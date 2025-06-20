@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Campus Expense Manager</string>
+
+    <string name="initialization_connecting">Connecting to local database…</string>
+    <string name="initialization_error">Connection to local database failed.</string>
+    <string name="initialization_done">Done!</string>
+
+    <string name="login_button">Login</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_remember">Remember me</string>
+
+    <string name="permission_text">Requesting permissions…</string>
+    <string name="permission_error">Missing permissions:%n%s</string>
+    <string name="permission_ok">All permissions granted</string>
+    <string name="permission_sdk">SDK: %d (Android %s)</string>
+    <string name="permission_goto">Grant permissions</string>
+</resources>

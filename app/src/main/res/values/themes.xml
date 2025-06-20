@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="Base.Theme.CampusExpenseManager" parent="Theme.Material3.DynamicColors.Light" />
+
+    <style name="Theme.CampusExpenseManager" parent="Base.Theme.CampusExpenseManager">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="fontFamily">@font/nutino</item>
+        <item name="android:fontFamily">@font/nutino</item>
+    </style>
+</resources>
