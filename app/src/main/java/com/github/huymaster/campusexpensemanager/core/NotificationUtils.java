@@ -24,10 +24,4 @@ public class NotificationUtils {
         String permission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? Manifest.permission.POST_NOTIFICATIONS : "android.permission.POST_NOTIFICATIONS";
         return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
-
-    public enum NotificationType {
-        ERROR,
-        NORMAL,
-        SILENT;
-    }
 }

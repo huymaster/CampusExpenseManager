@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(new View(this));
-        
+
         if (getIntent().hasExtra("permissionGranted")) {
             binding = MainActivityBinding.inflate(getLayoutInflater());
             Functions.setupInsets(binding);

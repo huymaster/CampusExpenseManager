@@ -4,12 +4,9 @@ import android.app.Application;
 
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.NotificationUtils;
-import com.github.huymaster.campusexpensemanager.data.DataSourceImpl;
-import com.github.huymaster.campusexpensemanager.data.LocalDataSource;
 
 public class MainApplication extends Application {
     public static MainApplication INSTANCE;
-    private final DataSourceImpl local = new LocalDataSource(this);
     private ApplicationPreferences preferences;
     private NotificationUtils notification;
 
@@ -19,10 +16,6 @@ public class MainApplication extends Application {
         super.onCreate();
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
-    }
-
-    public DataSourceImpl getLocalDataSource() {
-        return local;
     }
 
     public ApplicationPreferences getPreferences() {
