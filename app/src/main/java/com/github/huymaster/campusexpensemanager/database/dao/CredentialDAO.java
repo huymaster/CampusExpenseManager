@@ -5,7 +5,7 @@ import com.github.huymaster.campusexpensemanager.database.TableProxy;
 import com.github.huymaster.campusexpensemanager.database.type.Credential;
 
 public class CredentialDAO extends DAO<Credential> {
-    protected CredentialDAO(TableProxy<Credential> proxy) {
+    protected CredentialDAO(TableProxy<? extends Credential> proxy) {
         super(proxy);
     }
 }
