@@ -84,6 +84,7 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+    testImplementation(libs.ktorm.core)
     implementation(libs.work.runtime)
     runtimeOnly(libs.compose.bom)
     implementation(libs.core.ktx)

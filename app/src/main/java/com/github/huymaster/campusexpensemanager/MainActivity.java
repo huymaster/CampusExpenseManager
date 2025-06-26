@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(new View(this));
 
         if (getIntent().hasExtra("permissionGranted")) {
+            getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
             binding = MainActivityBinding.inflate(getLayoutInflater());
             Functions.setupInsets(binding);
             setContentView(binding.getRoot());

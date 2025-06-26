@@ -85,6 +85,10 @@ fabric.properties
 *.ap_
 *.aab
 
+# Test files
+/app/src/androidTest
+/app/src/test
+
 # Files for the ART/Dalvik VM
 *.dex
 
