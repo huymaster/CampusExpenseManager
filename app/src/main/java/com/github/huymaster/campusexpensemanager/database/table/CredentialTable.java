@@ -1,4 +1,4 @@
-package com.github.huymaster.campusexpensemanager.table;
+package com.github.huymaster.campusexpensemanager.database.table;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
 
 import com.github.huymaster.campusexpensemanager.database.Table;
-import com.github.huymaster.campusexpensemanager.type.Credential;
+import com.github.huymaster.campusexpensemanager.database.type.Credential;
 
 import java.util.function.Predicate;
 

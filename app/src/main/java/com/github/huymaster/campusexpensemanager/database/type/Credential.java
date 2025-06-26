@@ -1,4 +1,4 @@
-package com.github.huymaster.campusexpensemanager.type;
+package com.github.huymaster.campusexpensemanager.database.type;
 
 import android.content.ContentValues;
 import android.util.Log;

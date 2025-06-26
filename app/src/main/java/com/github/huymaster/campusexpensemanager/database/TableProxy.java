@@ -2,7 +2,7 @@ package com.github.huymaster.campusexpensemanager.database;
 
 import android.database.sqlite.SQLiteDatabase;
 
-import com.github.huymaster.campusexpensemanager.type.ContentType;
+import com.github.huymaster.campusexpensemanager.database.type.ContentType;
 
 import java.util.function.Predicate;
 import java.util.stream.Stream;

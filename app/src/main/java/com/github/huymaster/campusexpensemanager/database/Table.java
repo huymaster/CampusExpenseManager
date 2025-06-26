@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.huymaster.campusexpensemanager.type.ContentType;
+import com.github.huymaster.campusexpensemanager.database.type.ContentType;
 
 import org.jetbrains.annotations.NotNull;
 
