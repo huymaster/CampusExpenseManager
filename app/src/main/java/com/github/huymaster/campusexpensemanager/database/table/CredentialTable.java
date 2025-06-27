@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import com.github.huymaster.campusexpensemanager.database.Table;
 import com.github.huymaster.campusexpensemanager.database.type.Credential;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 public class CredentialTable extends Table<Credential> {
@@ -43,21 +44,25 @@ public class CredentialTable extends Table<Credential> {
     }
 
     @Override
-    public void insert(@NonNull SQLiteDatabase database, @NonNull Credential credential) {
-        if (exists(database, c -> c.username.equals(credential.username))) return;
-        database.insert(Credential.TABLE_NAME, null, credential.toContentValues());
+    public long insert(@NonNull SQLiteDatabase database, @NonNull Credential credential) {
+        if (exists(database, c -> c.username.equals(credential.username))) return 0;
+        return database.insert(Credential.TABLE_NAME, null, credential.toContentValues());
     }
 
     @Override
-    public void update(@NonNull SQLiteDatabase database, @NonNull Predicate<Credential> selector, @NonNull Credential credential) {
-        if (!exists(database, c -> c.username.equals(credential.username))) return;
-        database.update(Credential.TABLE_NAME, credential.toContentValues(), Credential.COLUMN_USERNAME + " = ?", new String[]{credential.username});
+    public long update(@NonNull SQLiteDatabase database, @NonNull Predicate<Credential> selector, @NonNull Credential credential) {
+        if (!exists(database, selector)) return 0;
+        return database.update(Credential.TABLE_NAME, credential.toContentValues(), Credential.COLUMN_USERNAME + " = ?", new String[]{credential.username});
     }
 
     @Override
-    public void delete(@NonNull SQLiteDatabase database, @NonNull Predicate<Credential> selector) {
-        if (!exists(database, selector)) return;
+    public long delete(@NonNull SQLiteDatabase database, @NonNull Predicate<Credential> selector) {
+        if (!exists(database, selector)) return 0;
         var stream = getAll(database);
-        stream.filter(selector).forEach(c -> database.delete(Credential.TABLE_NAME, Credential.COLUMN_USERNAME + " = ?", new String[]{c.username}));
+        var count = new AtomicLong(0L);
+        stream.filter(selector)
+                .map(c -> database.delete(Credential.TABLE_NAME, Credential.COLUMN_USERNAME + " = ?", new String[]{c.username}))
+                .forEach(count::addAndGet);
+        return count.get();
     }
 }

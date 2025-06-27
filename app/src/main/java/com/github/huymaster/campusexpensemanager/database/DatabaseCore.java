@@ -17,26 +17,27 @@ import java.util.List;
 /**
  *
  */
-public class DatabaseCore implements AutoCloseable {
+public class DatabaseCore {
     private static final String TAG = "DatabaseCore";
     private static final String DATABASE_NAME = "database.db";
     private static final int DATABASE_VERSION = 1;
     private final List<Class<? extends Table<? extends ContentType>>> tables = new LinkedList<>();
-    private final SQLiteDatabase database;
+    private final Context context;
     private boolean initialized = false;
 
     public DatabaseCore(@NotNull Context context) {
-        this(context.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null));
+        this.context = context;
+        prepareTable();
     }
 
-    public DatabaseCore(@NotNull SQLiteDatabase database) {
-        this.database = database;
-        prepareTable();
+    private SQLiteDatabase getDatabase() {
+        SQLiteDatabase database = context.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
+        init(database);
+        return database;
     }
 
     private void prepareTable() {
         tables.add(CredentialTable.class);
-
     }
 
     private <T extends Table<? extends ContentType>> T get(@NotNull Class<T> tableClass) {
@@ -63,30 +64,16 @@ public class DatabaseCore implements AutoCloseable {
     public <T extends ContentType> TableProxy<T> getProxy(@NotNull Class<? extends Table<T>> tableClass) {
         var table = get(tableClass);
         if (table == null) return null;
-        return new TableProxy<>(database, table);
+        return new TableProxy<>(getDatabase(), table);
     }
 
-    public SQLiteDatabase getDatabase() {
-        return database;
+    public void init(SQLiteDatabase database) {
+        initialized = true;
+        initialize(database);
+        updateIfNeeded(database);
     }
 
-    public void init() {
-        if (initialized) {
-            Log.d(TAG, "Database already initialized.");
-        } else {
-            initialized = true;
-            initialize();
-            updateIfNeeded();
-        }
-    }
-
-    @Override
-    public void close() {
-        if (database != null)
-            database.close();
-    }
-
-    private void initialize() {
+    private void initialize(SQLiteDatabase database) {
         for (var tableClass : tables) {
             if (tableClass == null)
                 continue;
@@ -96,14 +83,14 @@ public class DatabaseCore implements AutoCloseable {
         }
     }
 
-    private void updateIfNeeded() {
+    private void updateIfNeeded(SQLiteDatabase database) {
         if (database.getVersion() < DATABASE_VERSION) {
-            update();
+            update(database);
             database.setVersion(DATABASE_VERSION);
         }
     }
 
-    private void update() {
+    private void update(SQLiteDatabase database) {
         for (var tableClass : tables) {
             if (tableClass == null)
                 continue;
@@ -111,6 +98,6 @@ public class DatabaseCore implements AutoCloseable {
             if (table != null)
                 table.drop(database);
         }
-        initialize();
+        initialize(database);
     }
 }

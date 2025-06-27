@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.databinding.InitializationFragmentBinding;
 
 public class InitializationFragment extends BaseFragment {
@@ -23,10 +24,7 @@ public class InitializationFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        MainApplication.INSTANCE.getLocalDataSource().useConnection(conn -> {
-//            Credential.createTable(conn);
-//            return null;
-//        });
+        getNavController().navigate(R.id.action_initializationFragment_to_loginFragment);
     }
 
     @Override

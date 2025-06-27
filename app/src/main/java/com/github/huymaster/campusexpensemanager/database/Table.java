@@ -40,11 +40,11 @@ public abstract class Table<T extends ContentType> {
         return list.stream();
     }
 
-    public abstract void insert(@NotNull SQLiteDatabase database, @NotNull T t);
+    public abstract long insert(@NotNull SQLiteDatabase database, @NotNull T t);
 
-    public abstract void update(@NotNull SQLiteDatabase database, @NotNull Predicate<T> selector, @NotNull T t);
+    public abstract long update(@NotNull SQLiteDatabase database, @NotNull Predicate<T> selector, @NotNull T t);
 
-    public abstract void delete(@NotNull SQLiteDatabase database, @NotNull Predicate<T> selector);
+    public abstract long delete(@NotNull SQLiteDatabase database, @NotNull Predicate<T> selector);
 
     protected boolean exists(@NotNull SQLiteDatabase database, @NotNull Predicate<T> predicate) {
         return getAll(database).anyMatch(predicate);

@@ -20,16 +20,16 @@ public class TableProxy<T extends ContentType> implements AutoCloseable {
         return table.getAll(database);
     }
 
-    public void insert(T t) {
-        table.insert(database, t);
+    public long insert(T t) {
+        return table.insert(database, t);
     }
 
-    public void update(Predicate<T> selector, T t) {
-        table.update(database, selector, t);
+    public long update(Predicate<T> selector, T t) {
+        return table.update(database, selector, t);
     }
 
-    public void delete(Predicate<T> selector) {
-        table.delete(database, selector);
+    public long delete(Predicate<T> selector) {
+        return table.delete(database, selector);
     }
 
     @Override
