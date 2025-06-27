@@ -1,4 +1,4 @@
-image: eclipse-temurin:21-jdk-ubi9-minimal
+image: eclipse-temurin:21-jdk-jammy
 
 variables:
   ANDROID_COMPILE_SDK: "36"
