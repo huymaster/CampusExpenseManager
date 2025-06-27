@@ -15,6 +15,7 @@ idea {
 android {
     namespace = "com.github.huymaster.campusexpensemanager"
     compileSdk = 36
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "com.github.huymaster.campusexpensemanager"
