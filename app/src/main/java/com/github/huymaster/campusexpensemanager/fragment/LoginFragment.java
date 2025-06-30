@@ -21,6 +21,8 @@ import com.github.huymaster.campusexpensemanager.database.table.CredentialTable;
 import com.github.huymaster.campusexpensemanager.database.type.Credential;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
 
+import java.util.Locale;
+
 public class LoginFragment extends BaseFragment {
     private LoginFragmentBinding binding;
     private CredentialDAO credentialDAO;
@@ -84,9 +86,12 @@ public class LoginFragment extends BaseFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                var username = binding.loginUsername.getText() == null ? "" : binding.loginUsername.getText().toString();
-                binding.loginButton.setEnabled(username.length() > 0);
-                binding.loginButton.setText(credentialDAO.checkUsername(username) ? R.string.login_button_login : R.string.login_button_signup);
+                var username = (binding.loginUsername.getText() == null ? "" : binding.loginUsername.getText().toString());
+                var lower = username.toLowerCase(Locale.ROOT);
+                if (!lower.equals(username))
+                    binding.loginUsername.setText(lower);
+                binding.loginButton.setEnabled(lower.length() > 0);
+                binding.loginButton.setText(credentialDAO.checkUsername(lower) ? R.string.login_button_login : R.string.login_button_signup);
             }
         };
     }
@@ -114,6 +119,8 @@ public class LoginFragment extends BaseFragment {
         if (credentialDAO.checkPassword(username, password)) {
             Toast.makeText(getMainActivity(), "Successfully logged in!", Toast.LENGTH_LONG).show();
             getMainActivity().finish();
+        } else {
+            Toast.makeText(getMainActivity(), "Wrong password!", Toast.LENGTH_LONG).show();
         }
     }
 

@@ -13,12 +13,14 @@ public class CredentialDAO extends DAO<Credential> {
 
     public boolean insert(String username, String password) {
         if (checkUsername(username)) return false;
+        if (password.length() == 0) return false;
         Credential credential = new Credential(username, password);
         return proxy.insert(credential) > 0;
     }
 
     public boolean changePassword(String username, String oldPassword, String newPassword) {
         if (checkUsername(username) && checkPassword(username, oldPassword)) {
+            if (newPassword.length() == 0) return false;
             Credential credential = new Credential(username, newPassword);
             return proxy.update(c -> c.username.equals(username), credential) > 0;
         }
