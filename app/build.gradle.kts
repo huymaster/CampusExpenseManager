@@ -1,6 +1,7 @@
 plugins {
     idea
     alias(libs.plugins.android.application)
+    id("realm-android")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
@@ -43,6 +44,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
         dataBinding = true
         compose = true
@@ -50,10 +52,6 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
-    }
-
-    kotlinOptions {
-        jvmTarget = "21"
     }
 }
 
@@ -81,6 +79,7 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
     implementation(libs.sqlite)
+    implementation(libs.realm)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)

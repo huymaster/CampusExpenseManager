@@ -1,103 +1,57 @@
 package com.github.huymaster.campusexpensemanager.database;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.huymaster.campusexpensemanager.database.table.CredentialTable;
-import com.github.huymaster.campusexpensemanager.database.type.ContentType;
+import java.util.function.Function;
 
-import org.jetbrains.annotations.NotNull;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedList;
-import java.util.List;
-
-/**
- *
- */
 public class DatabaseCore {
     private static final String TAG = "DatabaseCore";
-    private static final String DATABASE_NAME = "database.db";
-    private static final int DATABASE_VERSION = 1;
-    private final List<Class<? extends Table<? extends ContentType>>> tables = new LinkedList<>();
     private final Context context;
-    private boolean initialized = false;
 
-    public DatabaseCore(@NotNull Context context) {
+    public DatabaseCore(Context context) {
         this.context = context;
-        prepareTable();
+        Realm.init(context);
+        Realm realm = Realm.getInstance(getDefaultConfiguration());
+        Log.d(TAG, "Realm version: " + realm.getVersion());
+        Log.d(TAG, "Realm path: " + realm.getPath());
+        realm.close();
     }
 
-    private SQLiteDatabase getDatabase() {
-        SQLiteDatabase database = context.openOrCreateDatabase(DATABASE_NAME, Context.MODE_PRIVATE, null);
-        init(database);
-        return database;
+    private RealmConfiguration getDefaultConfiguration() {
+        return new RealmConfiguration.Builder()
+                .directory(context.getFilesDir())
+                .name("database.realm")
+                .deleteRealmIfMigrationNeeded()
+                .build();
     }
 
-    private void prepareTable() {
-        tables.add(CredentialTable.class);
+    public <T> T useRealm(Function<Realm, T> action) {
+        return useRealm(action, getDefaultConfiguration());
     }
 
-    private <T extends Table<? extends ContentType>> T get(@NotNull Class<T> tableClass) {
-        if (!tables.contains(tableClass))
+    public <T> T useRealm(Function<Realm, T> action, RealmConfiguration configuration) {
+        try (Realm realm = Realm.getInstance(configuration)) {
+            return action.apply(realm);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed when executing action", e);
             return null;
-        try {
-            Constructor<T> constructor = tableClass.getConstructor();
-            constructor.setAccessible(true);
-            return constructor.newInstance();
-        } catch (NoSuchMethodException e) {
-            Log.w(TAG, "Class " + tableClass.getName() + " does not have a default constructor", e);
-        } catch (SecurityException e) {
-            Log.w(TAG, "Can't access default constructor of class " + tableClass.getName(), e);
-        } catch (InvocationTargetException e) {
-            Log.w(TAG, "Error while instantiating class " + tableClass.getName(), e);
-        } catch (IllegalAccessException e) {
-            Log.w(TAG, "Can't access default constructor of class " + tableClass.getName() + ". Maybe it's private", e);
-        } catch (InstantiationException e) {
-            Log.w(TAG, tableClass.getName() + " is an abstract class. Can't instantiate it", e);
-        }
-        return null;
-    }
-
-    public <T extends ContentType> TableProxy<T> getProxy(@NotNull Class<? extends Table<T>> tableClass) {
-        var table = get(tableClass);
-        if (table == null) return null;
-        return new TableProxy<>(getDatabase(), table);
-    }
-
-    public void init(SQLiteDatabase database) {
-        initialized = true;
-        initialize(database);
-        updateIfNeeded(database);
-    }
-
-    private void initialize(SQLiteDatabase database) {
-        for (var tableClass : tables) {
-            if (tableClass == null)
-                continue;
-            Table<?> table = get(tableClass);
-            if (table != null)
-                table.create(database);
         }
     }
 
-    private void updateIfNeeded(SQLiteDatabase database) {
-        if (database.getVersion() < DATABASE_VERSION) {
-            update(database);
-            database.setVersion(DATABASE_VERSION);
-        }
+    public <T> T useTransaction(Function<Realm, T> action) {
+        return useTransaction(action, getDefaultConfiguration());
     }
 
-    private void update(SQLiteDatabase database) {
-        for (var tableClass : tables) {
-            if (tableClass == null)
-                continue;
-            Table<?> table = get(tableClass);
-            if (table != null)
-                table.drop(database);
-        }
-        initialize(database);
+    public <T> T useTransaction(Function<Realm, T> action, RealmConfiguration configuration) {
+        return useRealm(realm -> {
+            realm.beginTransaction();
+            T result = action.apply(realm);
+            realm.commitTransaction();
+            return result;
+        }, configuration);
     }
 }

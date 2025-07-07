@@ -1,57 +1,61 @@
 package com.github.huymaster.campusexpensemanager.database.type;
 
-import android.content.ContentValues;
 import android.util.Log;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
-public class Credential implements ContentType {
-    public static final String TABLE_NAME = "credential";
-    public static final String COLUMN_USERNAME = "username";
-    public static final String COLUMN_PASSWORD = "password";
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Required;
+
+public class Credential extends RealmObject {
     private static final String TAG = "Credential";
-    public String username;
-    public byte[] password;
+    @PrimaryKey
+    @Required
+    private String username;
+    
+    @Required
+    private byte[] password;
 
     public Credential() {
-    }
-
-    public Credential(String username, byte[] password) {
-        this();
-        this.username = username;
-        this.password = password;
     }
 
     public Credential(String username, String password) {
         this(username, hash(password));
     }
 
+    public Credential(String username, byte[] password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public static byte[] hash(String password) {
-        String[] digests = {"SHA-512", "SHA-256", "SHA-1", "MD5"};
-        MessageDigest md;
-        for (String digest : digests) {
-            try {
-                md = MessageDigest.getInstance(digest);
-                Log.d(TAG, "Hashing password with " + digest);
-                return md.digest(password.getBytes());
-            } catch (NoSuchAlgorithmException e) {
-                Log.w(TAG, "No such algorithm: " + digest, e);
-            }
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            return md.digest(password.getBytes());
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to hash password. !!! Returning raw password !!!", e);
+            return password.getBytes();
         }
-        return password.getBytes();
     }
 
-    public static boolean check(byte[] hash, String password) {
-        return Arrays.equals(hash, hash(password));
+    public String getUsername() {
+        return username;
     }
 
-    @Override
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USERNAME, username);
-        values.put(COLUMN_PASSWORD, password);
-        return values;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public byte[] getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = hash(password);
+    }
+
+    public void setPassword(byte[] password) {
+        this.password = password;
     }
 }
