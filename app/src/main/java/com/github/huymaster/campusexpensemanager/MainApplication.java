@@ -9,9 +9,14 @@ import com.github.huymaster.campusexpensemanager.database.DatabaseCore;
 public class MainApplication extends Application {
     private static final String TAG = "MainApplication";
     public static MainApplication INSTANCE;
+    private boolean isDebug = false;
     private ApplicationPreferences preferences;
     private NotificationUtils notification;
     private DatabaseCore databaseCore;
+
+    public static boolean isDebug() {
+        return INSTANCE.isDebug;
+    }
 
     public static ApplicationPreferences getPreferences() {
         return INSTANCE.preferences;
@@ -29,6 +34,7 @@ public class MainApplication extends Application {
     public void onCreate() {
         INSTANCE = this;
         super.onCreate();
+        isDebug = BuildConfig.DEBUG;
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
         databaseCore = new DatabaseCore(this);

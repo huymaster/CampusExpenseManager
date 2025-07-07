@@ -1,6 +1,8 @@
 package com.github.huymaster.campusexpensemanager;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -10,9 +12,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,6 +46,7 @@ public class PermissionActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
     }
 
     @Override
@@ -51,11 +57,11 @@ public class PermissionActivity extends AppCompatActivity {
 
     private void requestPermission() {
         requestOverlayPermission();
+        requestIgnoreBatteryOptimization();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             requestPostNotification();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             requestStoragePermission();
-
     }
 
     private void requestPostNotification() {
@@ -80,16 +86,29 @@ public class PermissionActivity extends AppCompatActivity {
     private void requestOverlayPermission() {
         if (checkPermission(Manifest.permission.SYSTEM_ALERT_WINDOW)) return;
         PackageManager pm = getPackageManager();
-        Intent overlaySetting = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+
         Intent applicationDetailsSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         applicationDetailsSettings.setData(Uri.parse("package:" + getPackageName()));
-        overlaySetting.setData(Uri.parse("package:" + getPackageName()));
+
+        Intent overlaySetting = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+//        overlaySetting.setData(Uri.parse("package:" + getPackageName()));
+
         ResolveInfo info = pm.resolveActivity(overlaySetting, PackageManager.MATCH_SYSTEM_ONLY);
         if (info != null) {
             startActivity(overlaySetting);
+            Toast.makeText(this, "Please allow overlay permission for " + getString(R.string.app_name), Toast.LENGTH_LONG).show();
         } else {
             startActivity(applicationDetailsSettings);
         }
+    }
+
+    @SuppressLint("BatteryLife")
+    private void requestIgnoreBatteryOptimization() {
+        if (checkPermission(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS))
+            return;
+        Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivity(intent);
     }
 
     private void checkPermissions() {
@@ -100,6 +119,7 @@ public class PermissionActivity extends AppCompatActivity {
 
         var notGrant = permissionMap.entrySet().stream().filter(e -> !e.getValue()).map(Map.Entry::getKey).iterator();
         var iterable = new Iterable<String>() {
+            @NonNull
             @Override
             public Iterator<String> iterator() {
                 return notGrant;
@@ -132,6 +152,7 @@ public class PermissionActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             permissions.add(Manifest.permission.MANAGE_EXTERNAL_STORAGE);
+        permissions.add(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
         return permissions;
     }
@@ -143,6 +164,10 @@ public class PermissionActivity extends AppCompatActivity {
             return Environment.isExternalStorageManager();
         if (permission.equals(Manifest.permission.SYSTEM_ALERT_WINDOW))
             return Settings.canDrawOverlays(this);
+        if (permission.equals(Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+            PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            return powerManager != null && powerManager.isIgnoringBatteryOptimizations(getPackageName());
+        }
         return false;
     }
 }
