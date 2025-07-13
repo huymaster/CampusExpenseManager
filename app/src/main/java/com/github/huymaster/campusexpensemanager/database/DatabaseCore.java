@@ -3,10 +3,13 @@ package com.github.huymaster.campusexpensemanager.database;
 import android.content.Context;
 import android.util.Log;
 
-import java.util.function.Function;
+import com.github.huymaster.campusexpensemanager.database.dao.BaseDAO;
+
+import java.lang.reflect.Constructor;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmModel;
 
 public class DatabaseCore {
     private static final String TAG = "DatabaseCore";
@@ -29,29 +32,20 @@ public class DatabaseCore {
                 .build();
     }
 
-    public <T> T useRealm(Function<Realm, T> action) {
-        return useRealm(action, getDefaultConfiguration());
+    public Realm getRealm() {
+        return Realm.getInstance(getDefaultConfiguration());
     }
 
-    public <T> T useRealm(Function<Realm, T> action, RealmConfiguration configuration) {
-        try (Realm realm = Realm.getInstance(configuration)) {
-            return action.apply(realm);
+    public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz) {
+        try {
+            Constructor<V> constructor = clazz.getConstructor(DatabaseCore.class);
+            constructor.setAccessible(true);
+            if (constructor.isAccessible())
+                return constructor.newInstance(this);
+            else
+                throw new IllegalStateException("Can't create " + clazz.getSimpleName() + " instance: constructor is not accessible");
         } catch (Exception e) {
-            Log.w(TAG, "Failed when executing action", e);
-            return null;
+            throw new IllegalStateException("Can't create " + clazz.getSimpleName() + " instance: " + e.getMessage(), e);
         }
-    }
-
-    public <T> T useTransaction(Function<Realm, T> action) {
-        return useTransaction(action, getDefaultConfiguration());
-    }
-
-    public <T> T useTransaction(Function<Realm, T> action, RealmConfiguration configuration) {
-        return useRealm(realm -> {
-            realm.beginTransaction();
-            T result = action.apply(realm);
-            realm.commitTransaction();
-            return result;
-        }, configuration);
     }
 }

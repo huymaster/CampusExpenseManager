@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.sqlite)
     implementation(libs.realm)
+    implementation(libs.guava)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)

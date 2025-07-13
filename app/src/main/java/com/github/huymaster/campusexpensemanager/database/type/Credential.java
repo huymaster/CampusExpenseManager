@@ -2,7 +2,10 @@ package com.github.huymaster.campusexpensemanager.database.type;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.security.MessageDigest;
+import java.util.Arrays;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -13,7 +16,7 @@ public class Credential extends RealmObject {
     @PrimaryKey
     @Required
     private String username;
-    
+
     @Required
     private byte[] password;
 
@@ -37,6 +40,18 @@ public class Credential extends RealmObject {
             Log.w(TAG, "Failed to hash password. !!! Returning raw password !!!", e);
             return password.getBytes();
         }
+    }
+
+    public static boolean verify(@NonNull Credential credential, String password) {
+        return verify(password, credential.password);
+    }
+
+    public static boolean verify(String password, byte[] hash) {
+        return verify(hash(password), hash);
+    }
+
+    public static boolean verify(byte[] password, byte[] hash) {
+        return Arrays.equals(password, hash);
     }
 
     public String getUsername() {

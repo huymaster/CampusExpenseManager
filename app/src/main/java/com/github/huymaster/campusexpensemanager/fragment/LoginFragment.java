@@ -11,11 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.github.huymaster.campusexpensemanager.MainApplication;
+import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
+import com.github.huymaster.campusexpensemanager.database.dao.CredentialDAO;
+import com.github.huymaster.campusexpensemanager.database.type.Credential;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
 
 public class LoginFragment extends BaseFragment {
     private LoginFragmentBinding binding;
+    private CredentialDAO credentialDAO;
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
@@ -27,8 +31,9 @@ public class LoginFragment extends BaseFragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            binding.loginButton.setEnabled(s.length() > 0);
-            if (s.length() == 0) return;
+            var username = s.toString();
+            if (username.length() == 0) return;
+            binding.loginButton.setText(credentialDAO.exists(username, Credential::getUsername) ? R.string.login_button_login : R.string.login_button_signup);
         }
     };
 
@@ -36,6 +41,7 @@ public class LoginFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = LoginFragmentBinding.inflate(inflater, container, false);
+        credentialDAO = MainApplication.getDatabaseCore().getDAO(CredentialDAO.class);
         return binding.getRoot();
     }
 
@@ -54,6 +60,8 @@ public class LoginFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        credentialDAO.close();
+        credentialDAO = null;
         binding = null;
     }
 
@@ -68,9 +76,6 @@ public class LoginFragment extends BaseFragment {
             var password = preferences.get(ApplicationPreferences.rememberPassword, "");
             binding.loginUsername.setText(username);
             binding.loginPassword.setText(password);
-        }
-        if (binding.loginUsername.getText() == null || binding.loginUsername.getText().length() == 0 || binding.loginPassword.getText() == null || binding.loginPassword.getText().length() == 0) {
-            binding.loginButton.setEnabled(false);
         }
     }
 
