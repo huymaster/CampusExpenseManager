@@ -63,25 +63,14 @@ public class CredentialDAO extends BaseDAO<Credential> {
     }
 
     public boolean add(String username, String password) {
-        try (Realm realm = core.getRealm()) {
-            realm.beginTransaction();
-            Credential credential = realm.where(Credential.class).equalTo("username", username).findFirst();
-            if (credential != null) return false;
-            credential = new Credential(username, password);
-            realm.insertOrUpdate(credential);
-            realm.commitTransaction();
-            return true;
-        }
+        if (exists(username, Credential::getUsername)) return false;
+        Credential credential = new Credential(username, password);
+        return insert(credential);
     }
 
     public boolean remove(String username) {
-        try (Realm realm = core.getRealm()) {
-            realm.beginTransaction();
-            Credential credential = realm.where(Credential.class).equalTo("username", username).findFirst();
-            if (credential == null) return false;
-            credential.deleteFromRealm();
-            realm.commitTransaction();
-            return true;
-        }
+        Credential credential = realm.where(Credential.class).equalTo("username", username).findFirst();
+        if (credential == null) return false;
+        return delete(credential);
     }
 }

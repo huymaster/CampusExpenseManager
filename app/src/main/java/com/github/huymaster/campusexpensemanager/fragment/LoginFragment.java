@@ -13,9 +13,11 @@ import androidx.annotation.Nullable;
 import com.github.huymaster.campusexpensemanager.MainApplication;
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
+import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
 import com.github.huymaster.campusexpensemanager.database.dao.CredentialDAO;
 import com.github.huymaster.campusexpensemanager.database.type.Credential;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
+import com.google.android.material.snackbar.Snackbar;
 
 public class LoginFragment extends BaseFragment {
     private LoginFragmentBinding binding;
@@ -81,15 +83,52 @@ public class LoginFragment extends BaseFragment {
 
     private void save() {
         ApplicationPreferences preferences = MainApplication.getPreferences();
-        var username = binding.loginUsername.getText() == null ? "" : binding.loginUsername.getText().toString();
-        var password = binding.loginPassword.getText() == null ? "" : binding.loginPassword.getText().toString();
+        var username = ViewFunctions.getTextOrEmpty(binding.loginUsername);
+        var password = ViewFunctions.getTextOrEmpty(binding.loginPassword);
         preferences.set(ApplicationPreferences.rememberLogin, binding.loginRemember.isChecked());
         preferences.set(ApplicationPreferences.rememberUsername, username.toLowerCase());
         preferences.set(ApplicationPreferences.rememberPassword, password);
     }
 
     private void buttonClick() {
-        var username = binding.loginUsername.getText() == null ? "" : binding.loginUsername.getText().toString();
-        var password = binding.loginPassword.getText() == null ? "" : binding.loginPassword.getText().toString();
+        try {
+            var username = ViewFunctions.getTextOrEmpty(binding.loginUsername);
+            var password = ViewFunctions.getTextOrEmpty(binding.loginPassword);
+            if (username.length() == 0 || password.length() == 0) {
+                ViewFunctions.showSnackbar(binding, R.string.login_error_empty, Snackbar.LENGTH_SHORT);
+                return;
+            }
+            if (credentialDAO.exists(username, Credential::getUsername)) {
+                login(username, password);
+            } else {
+                signup(username, password);
+            }
+        } catch (Exception ignored) {
+            ViewFunctions.showSnackbar(binding, R.string.login_error_unknown, Snackbar.LENGTH_SHORT);
+        }
+    }
+
+    private void login(String username, String password) {
+        if (credentialDAO.exists(username, Credential::getUsername) && credentialDAO.checkValid(username, password)) {
+            ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
+        } else {
+            ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);
+        }
+    }
+
+    private void signup(String username, String password) {
+        if (credentialDAO.exists(username, Credential::getUsername)) {
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_exists, Snackbar.LENGTH_SHORT);
+        } else if (password.length() < 6) {
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_password_length, Snackbar.LENGTH_SHORT);
+        } else {
+            if (credentialDAO.add(username, password)) {
+                ViewFunctions.showSnackbar(binding, R.string.login_signup_success, Snackbar.LENGTH_SHORT);
+                binding.loginUsername.setText("");
+                binding.loginPassword.setText("");
+                binding.loginUsername.requestFocus();
+            } else
+                ViewFunctions.showSnackbar(binding, R.string.login_signup_failed, Snackbar.LENGTH_SHORT);
+        }
     }
 }

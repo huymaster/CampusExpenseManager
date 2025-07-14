@@ -10,6 +10,14 @@
     <string name="login_username">Username</string>
     <string name="login_password">Password</string>
     <string name="login_remember">Remember me</string>
+    <string name="login_error_unknown">Unknown error</string>
+    <string name="login_error_empty">Username and password must not be empty</string>
+    <string name="login_error_invalid">Invalid username or password</string>
+    <string name="login_success">Login successful</string>
+    <string name="login_signup_exists">Username already exists</string>
+    <string name="login_signup_password_length">Password must be at least 6 digits</string>
+    <string name="login_signup_failed">Sign up failed</string>
+    <string name="login_signup_success">Sign up successful. Please login.</string>
 
     <string name="permission_text">Requesting permissions…</string>
     <string name="permission_error">Missing permissions:%n%s</string>
