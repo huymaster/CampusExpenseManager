@@ -67,7 +67,7 @@ public class ViewFunctions {
 
     public static void showSnackbar(@NonNull View view, @StringRes int message, int duration, @Nullable Consumer<Snackbar> builder) {
         Resources resources = view.getResources();
-        showSnackbar(view, resources.getString(message), duration, builder);
+        showSnackbar(view, ResourceFunctions.getString(message), duration, builder);
     }
 
     public static void showSnackbar(@NonNull View view, @NonNull CharSequence message, int duration, Consumer<Snackbar> builder) {

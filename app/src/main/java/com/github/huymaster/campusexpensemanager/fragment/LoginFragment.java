@@ -15,13 +15,10 @@ import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
 import com.github.huymaster.campusexpensemanager.database.dao.CredentialDAO;
-import com.github.huymaster.campusexpensemanager.database.type.Credential;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
 import com.google.android.material.snackbar.Snackbar;
 
 public class LoginFragment extends BaseFragment {
-    private LoginFragmentBinding binding;
-    private CredentialDAO credentialDAO;
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
@@ -35,15 +32,15 @@ public class LoginFragment extends BaseFragment {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             var username = s.toString();
             if (username.length() == 0) return;
-            binding.loginButton.setText(credentialDAO.exists(username, Credential::getUsername) ? R.string.login_button_login : R.string.login_button_signup);
         }
     };
+    private LoginFragmentBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        var credentialDAO = MainApplication.getDatabaseCore().getDAO(CredentialDAO.class);
         binding = LoginFragmentBinding.inflate(inflater, container, false);
-        credentialDAO = MainApplication.getDatabaseCore().getDAO(CredentialDAO.class);
         return binding.getRoot();
     }
 
@@ -62,8 +59,6 @@ public class LoginFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        credentialDAO.close();
-        credentialDAO = null;
         binding = null;
     }
 
@@ -98,37 +93,16 @@ public class LoginFragment extends BaseFragment {
                 ViewFunctions.showSnackbar(binding, R.string.login_error_empty, Snackbar.LENGTH_SHORT);
                 return;
             }
-            if (credentialDAO.exists(username, Credential::getUsername)) {
-                login(username, password);
-            } else {
-                signup(username, password);
-            }
         } catch (Exception ignored) {
             ViewFunctions.showSnackbar(binding, R.string.login_error_unknown, Snackbar.LENGTH_SHORT);
         }
     }
 
     private void login(String username, String password) {
-        if (credentialDAO.exists(username, Credential::getUsername) && credentialDAO.checkValid(username, password)) {
-            ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
-        } else {
-            ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);
-        }
+
     }
 
     private void signup(String username, String password) {
-        if (credentialDAO.exists(username, Credential::getUsername)) {
-            ViewFunctions.showSnackbar(binding, R.string.login_signup_exists, Snackbar.LENGTH_SHORT);
-        } else if (password.length() < 6) {
-            ViewFunctions.showSnackbar(binding, R.string.login_signup_password_length, Snackbar.LENGTH_SHORT);
-        } else {
-            if (credentialDAO.add(username, password)) {
-                ViewFunctions.showSnackbar(binding, R.string.login_signup_success, Snackbar.LENGTH_SHORT);
-                binding.loginUsername.setText("");
-                binding.loginPassword.setText("");
-                binding.loginUsername.requestFocus();
-            } else
-                ViewFunctions.showSnackbar(binding, R.string.login_signup_failed, Snackbar.LENGTH_SHORT);
-        }
+
     }
 }

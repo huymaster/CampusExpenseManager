@@ -1,10 +1,13 @@
 <resources>
+    <!--Common-->
     <string name="app_name">Campus Expense Manager</string>
 
+    <!--InitializationFragment-->
     <string name="initialization_connecting">Connecting to local database…</string>
     <string name="initialization_error">Connection to local database failed.</string>
     <string name="initialization_done">Done!</string>
 
+    <!--LoginFragment-->
     <string name="login_button_login">Login</string>
     <string name="login_button_signup">Sign up</string>
     <string name="login_username">Username</string>
@@ -19,10 +22,10 @@
     <string name="login_signup_failed">Sign up failed</string>
     <string name="login_signup_success">Sign up successful. Please login.</string>
 
-    <string name="permission_text">Requesting permissions…</string>
-    <string name="permission_error">Missing permissions:%n%s</string>
-    <string name="permission_ok">All permissions granted</string>
-    <string name="permission_sdk">SDK: %d (Android %s)</string>
-    <string name="permission_goto">Grant permissions</string>
-    <string name="title_activity_main2">MainActivity2</string>
+    <!--Dialog-->
+    <string name="dialog_exit">Do you want to exit?</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
 </resources>

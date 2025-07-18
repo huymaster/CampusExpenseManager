@@ -38,7 +38,7 @@ public class DatabaseCore {
 
     public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz) {
         try {
-            Constructor<V> constructor = clazz.getConstructor(DatabaseCore.class);
+            Constructor<V> constructor = clazz.getDeclaredConstructor(DatabaseCore.class);
             constructor.setAccessible(true);
             if (constructor.isAccessible())
                 return constructor.newInstance(this);

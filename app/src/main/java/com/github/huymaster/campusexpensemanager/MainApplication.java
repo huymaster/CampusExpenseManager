@@ -5,6 +5,7 @@ import android.app.Application;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.NotificationUtils;
 import com.github.huymaster.campusexpensemanager.database.DatabaseCore;
+import com.google.android.material.color.DynamicColors;
 
 public class MainApplication extends Application {
     private static final String TAG = "MainApplication";
@@ -34,6 +35,7 @@ public class MainApplication extends Application {
     public void onCreate() {
         INSTANCE = this;
         super.onCreate();
+        DynamicColors.applyToActivitiesIfAvailable(this);
         isDebug = BuildConfig.DEBUG;
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
