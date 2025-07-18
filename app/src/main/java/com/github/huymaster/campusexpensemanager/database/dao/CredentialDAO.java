@@ -7,6 +7,6 @@ public class CredentialDAO extends BaseDAO<Credential> {
     public CredentialDAO(DatabaseCore databaseCore) {
         super(databaseCore);
         getRealm();
-        releaseRealm();
+        new Thread(this::releaseRealm).start();
     }
 }

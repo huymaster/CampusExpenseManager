@@ -14,8 +14,8 @@ import io.realm.RealmModel;
 
 public abstract class BaseDAO<T extends RealmModel> implements AutoCloseable {
     protected static final String SUPER_TAG = "BaseDAO";
+    protected static final ExecutorService IO_SERVICE = Executors.newSingleThreadExecutor();
     protected final String TAG = getClass().getSimpleName();
-    protected final ExecutorService IO_SERVICE = Executors.newSingleThreadExecutor();
     private final DatabaseCore databaseCore;
     private final Map<Long, Realm> workingRealms = new HashMap<>();
 
@@ -26,7 +26,7 @@ public abstract class BaseDAO<T extends RealmModel> implements AutoCloseable {
     protected Realm getRealm() {
         Realm realm = workingRealms.get(Thread.currentThread().getId());
         if (realm == null) {
-            Log.d(SUPER_TAG, "Creating new Realm instance for thread " + String.format("%02X", Thread.currentThread().getId()));
+            Log.d(SUPER_TAG, String.format("Creating new Realm instance for thread id %02X (%d)", Thread.currentThread().getId(), Thread.currentThread().getId()));
             realm = databaseCore.getRealm();
             workingRealms.put(Thread.currentThread().getId(), realm);
         }
@@ -34,15 +34,18 @@ public abstract class BaseDAO<T extends RealmModel> implements AutoCloseable {
     }
 
     protected void releaseRealm() {
-        Log.d(SUPER_TAG, "Releasing Realm instance for thread " + String.format("%02X", Thread.currentThread().getId()));
         Realm realm = workingRealms.remove(Thread.currentThread().getId());
-        if (realm == null)
+        if (realm == null) {
+            Log.w(SUPER_TAG, String.format("Realm instance for thread id %02X (%d) not found", Thread.currentThread().getId(), Thread.currentThread().getId()));
             return;
+        }
+        Log.d(SUPER_TAG, String.format("Releasing Realm instance for thread id %02X (%d)", Thread.currentThread().getId(), Thread.currentThread().getId()));
         if (realm.isInTransaction())
             realm.cancelTransaction();
         if (!realm.isClosed())
             realm.close();
     }
+
 
     @Override
     public void close() {

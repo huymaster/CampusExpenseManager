@@ -33,10 +33,10 @@ public class MainApplication extends Application {
 
     @Override
     public void onCreate() {
+        isDebug = BuildConfig.DEBUG;
         INSTANCE = this;
         super.onCreate();
         DynamicColors.applyToActivitiesIfAvailable(this);
-        isDebug = BuildConfig.DEBUG;
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
         databaseCore = new DatabaseCore(this);

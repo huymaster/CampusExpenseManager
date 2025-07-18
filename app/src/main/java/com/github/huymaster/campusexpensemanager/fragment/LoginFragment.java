@@ -14,7 +14,6 @@ import com.github.huymaster.campusexpensemanager.MainApplication;
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
-import com.github.huymaster.campusexpensemanager.database.dao.CredentialDAO;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -39,7 +38,6 @@ public class LoginFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        var credentialDAO = MainApplication.getDatabaseCore().getDAO(CredentialDAO.class);
         binding = LoginFragmentBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -87,6 +85,7 @@ public class LoginFragment extends BaseFragment {
 
     private void buttonClick() {
         try {
+            Thread.sleep(50000);
             var username = ViewFunctions.getTextOrEmpty(binding.loginUsername);
             var password = ViewFunctions.getTextOrEmpty(binding.loginPassword);
             if (username.length() == 0 || password.length() == 0) {

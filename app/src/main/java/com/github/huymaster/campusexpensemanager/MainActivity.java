@@ -6,7 +6,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.github.huymaster.campusexpensemanager.core.ResourceFunctions;
 import com.github.huymaster.campusexpensemanager.databinding.MainActivityBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -18,9 +17,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setTitle("Exit");
             builder.setMessage(R.string.dialog_exit);
             builder.setPositiveButton(R.string.dialog_ok, (dialog, which) -> finishAndRemoveTask());
-            builder.setPositiveButtonIcon(ResourceFunctions.getDrawable(R.drawable.ic_check));
             builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
-            builder.setNegativeButtonIcon(ResourceFunctions.getDrawable(R.drawable.ic_close));
             builder.show();
         }
     };
