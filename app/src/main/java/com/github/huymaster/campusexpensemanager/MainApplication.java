@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.NotificationUtils;
-import com.github.huymaster.campusexpensemanager.database.DatabaseCore;
 import com.google.android.material.color.DynamicColors;
 
 public class MainApplication extends Application {
@@ -13,7 +12,9 @@ public class MainApplication extends Application {
     private boolean isDebug = false;
     private ApplicationPreferences preferences;
     private NotificationUtils notification;
-    private DatabaseCore databaseCore;
+    private com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore realmDatabaseCore;
+    private com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore sqliteDatabaseCore;
+
 
     public static boolean isDebug() {
         return INSTANCE.isDebug;
@@ -27,8 +28,12 @@ public class MainApplication extends Application {
         return INSTANCE.notification;
     }
 
-    public static DatabaseCore getDatabaseCore() {
-        return INSTANCE.databaseCore;
+    public static com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore getRealmDatabaseCore() {
+        return INSTANCE.realmDatabaseCore;
+    }
+
+    public static com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore getSqliteDatabaseCore() {
+        return INSTANCE.sqliteDatabaseCore;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class MainApplication extends Application {
         DynamicColors.applyToActivitiesIfAvailable(this);
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
-        databaseCore = new DatabaseCore(this);
+        realmDatabaseCore = new com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore(this);
+        sqliteDatabaseCore = new com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore(this);
     }
 }

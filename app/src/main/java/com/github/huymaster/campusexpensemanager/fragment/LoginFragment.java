@@ -9,18 +9,29 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.github.huymaster.campusexpensemanager.MainApplication;
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
+import com.github.huymaster.campusexpensemanager.database.sqlite.dao.CredentialDAO;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
+import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 public class LoginFragment extends BaseFragment {
+    private LoginFragmentBinding binding;
+    private CredentialDAO dao;
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
+            for (int i = 0; i < s.length(); i++) {
+                if (s.charAt(i) == ' ') {
+                    s.delete(i, i + 1);
+                }
+            }
         }
 
         @Override
@@ -31,14 +42,17 @@ public class LoginFragment extends BaseFragment {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             var username = s.toString();
             if (username.length() == 0) return;
+            binding.loginButton.setText(dao.exists(username) ? R.string.login_button_login : R.string.login_button_signup);
         }
     };
-    private LoginFragmentBinding binding;
+    private UserViewModel loginStateHolder;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = LoginFragmentBinding.inflate(inflater, container, false);
+        dao = MainApplication.getSqliteDatabaseCore().getCredentialDAO(this);
+        loginStateHolder = new ViewModelProvider(this).get(UserViewModel.class);
         return binding.getRoot();
     }
 
@@ -62,6 +76,7 @@ public class LoginFragment extends BaseFragment {
 
     private void init() {
         binding.loginButton.setOnClickListener((v) -> buttonClick());
+        binding.loginButtonForgot.setOnClickListener((v) -> forgotPassword());
         binding.loginUsername.addTextChangedListener(textWatcher);
         ApplicationPreferences preferences = MainApplication.getPreferences();
         var checked = preferences.get(ApplicationPreferences.rememberLogin, false);
@@ -72,6 +87,12 @@ public class LoginFragment extends BaseFragment {
             binding.loginUsername.setText(username);
             binding.loginPassword.setText(password);
         }
+        loginStateHolder.getLoggedInState().observe(this, username -> {
+            binding.loginButton.setEnabled(username == null);
+            if (username != null) {
+                getNavController().navigate(R.id.action_loginFragment_to_mainFragment);
+            }
+        });
     }
 
     private void save() {
@@ -85,23 +106,61 @@ public class LoginFragment extends BaseFragment {
 
     private void buttonClick() {
         try {
-            Thread.sleep(50000);
             var username = ViewFunctions.getTextOrEmpty(binding.loginUsername);
             var password = ViewFunctions.getTextOrEmpty(binding.loginPassword);
             if (username.length() == 0 || password.length() == 0) {
                 ViewFunctions.showSnackbar(binding, R.string.login_error_empty, Snackbar.LENGTH_SHORT);
-                return;
+            }
+            if (dao.exists(username)) {
+                login(username, password);
+            } else {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireActivity());
+                builder.setTitle("New Account");
+                builder.setMessage(getString(R.string.dialog_create_account, username));
+                builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> signup(username, password));
+                builder.setNegativeButton(R.string.dialog_no, (dialog, which) -> dialog.dismiss());
+                builder.show();
             }
         } catch (Exception ignored) {
             ViewFunctions.showSnackbar(binding, R.string.login_error_unknown, Snackbar.LENGTH_SHORT);
         }
     }
 
-    private void login(String username, String password) {
+    private void forgotPassword() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireActivity());
+        builder.setTitle("Forgot Password");
+        builder.setMessage("This feature is not implemented yet. Contact the developer for manual password reset.");
+        builder.setPositiveButton(R.string.dialog_ok, (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
 
+    private void login(String username, String password) {
+        if (!dao.exists(username)) {
+            ViewFunctions.showSnackbar(binding, R.string.login_error_notfound, Snackbar.LENGTH_SHORT);
+            return;
+        }
+        var result = dao.get(username).checkPassword(password);
+        if (result) {
+            loginStateHolder.login(username);
+            ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
+        } else {
+            ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);
+        }
     }
 
     private void signup(String username, String password) {
-
+        if (dao.exists(username)) {
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_exists, Snackbar.LENGTH_SHORT);
+            return;
+        }
+        var result = dao.insert(username, password);
+        if (result) {
+            binding.loginUsername.requestFocus();
+            binding.loginUsername.setText("");
+            binding.loginPassword.setText("");
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_success, Snackbar.LENGTH_SHORT);
+        } else {
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_failed, Snackbar.LENGTH_SHORT);
+        }
     }
 }
