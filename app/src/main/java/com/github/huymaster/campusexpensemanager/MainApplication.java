@@ -6,6 +6,9 @@ import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.NotificationUtils;
 import com.google.android.material.color.DynamicColors;
 
+import dagger.hilt.android.HiltAndroidApp;
+
+@HiltAndroidApp
 public class MainApplication extends Application {
     private static final String TAG = "MainApplication";
     public static MainApplication INSTANCE;

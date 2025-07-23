@@ -4,6 +4,9 @@ plugins {
     id("realm-android")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    id("kotlin-kapt")
 }
 
 idea {
@@ -26,6 +29,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 
     buildTypes {
@@ -81,6 +90,8 @@ dependencies {
     implementation(libs.sqlite)
     implementation(libs.realm)
     implementation(libs.guava)
+    implementation(libs.hilt)
+    ksp(libs.hilt.compiler)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)

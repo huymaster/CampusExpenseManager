@@ -9,6 +9,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.github.huymaster.campusexpensemanager.databinding.MainActivityBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import dagger.hilt.android.AndroidEntryPoint;
+import dagger.hilt.android.WithFragmentBindings;
+
+@WithFragmentBindings
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
         @Override

@@ -3,13 +3,13 @@ package com.github.huymaster.campusexpensemanager.fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.github.huymaster.campusexpensemanager.MainApplication;
 import com.github.huymaster.campusexpensemanager.R;
@@ -22,6 +22,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 public class LoginFragment extends BaseFragment {
+    private static final String TAG = "LoginFragment";
     private LoginFragmentBinding binding;
     private CredentialDAO dao;
     private final TextWatcher textWatcher = new TextWatcher() {
@@ -45,21 +46,19 @@ public class LoginFragment extends BaseFragment {
             binding.loginButton.setText(dao.exists(username) ? R.string.login_button_login : R.string.login_button_signup);
         }
     };
-    private UserViewModel loginStateHolder;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = LoginFragmentBinding.inflate(inflater, container, false);
         dao = MainApplication.getSqliteDatabaseCore().getCredentialDAO(this);
-        loginStateHolder = new ViewModelProvider(this).get(UserViewModel.class);
+        init();
         return binding.getRoot();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        init();
     }
 
     @Override
@@ -87,7 +86,7 @@ public class LoginFragment extends BaseFragment {
             binding.loginUsername.setText(username);
             binding.loginPassword.setText(password);
         }
-        loginStateHolder.getLoggedInState().observe(this, username -> {
+        UserViewModel.INSTANCE.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
             binding.loginButton.setEnabled(username == null);
             if (username != null) {
                 getNavController().navigate(R.id.action_loginFragment_to_mainFragment);
@@ -110,6 +109,7 @@ public class LoginFragment extends BaseFragment {
             var password = ViewFunctions.getTextOrEmpty(binding.loginPassword);
             if (username.length() == 0 || password.length() == 0) {
                 ViewFunctions.showSnackbar(binding, R.string.login_error_empty, Snackbar.LENGTH_SHORT);
+                return;
             }
             if (dao.exists(username)) {
                 login(username, password);
@@ -121,8 +121,9 @@ public class LoginFragment extends BaseFragment {
                 builder.setNegativeButton(R.string.dialog_no, (dialog, which) -> dialog.dismiss());
                 builder.show();
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             ViewFunctions.showSnackbar(binding, R.string.login_error_unknown, Snackbar.LENGTH_SHORT);
+            Log.w(TAG, e);
         }
     }
 
@@ -141,7 +142,7 @@ public class LoginFragment extends BaseFragment {
         }
         var result = dao.get(username).checkPassword(password);
         if (result) {
-            loginStateHolder.login(username);
+            UserViewModel.INSTANCE.login(username);
             ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
         } else {
             ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);
