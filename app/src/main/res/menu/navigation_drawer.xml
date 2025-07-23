@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/navigation_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_home"
+            android:checked="true"
+            android:icon="@drawable/ic_home"
+            android:title="@string/navigation_home" />
+        <item
+            android:id="@+id/navigation_expenses"
+            android:icon="@drawable/ic_payment"
+            android:title="@string/navigation_expenses" />
+        <item
+            android:id="@+id/navigation_categories"
+            android:icon="@drawable/ic_category"
+            android:title="@string/navigation_categories" />
+        <item
+            android:id="@+id/navigation_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/navigation_settings" />
+    </group>
+    <item
+        android:id="@+id/navigation_logout"
+        android:icon="@drawable/ic_logout"
+        android:title="@string/navigation_logout" />
+</menu>

@@ -37,6 +37,17 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.github.huymaster.campusexpensemanager.fragment.MainFragment"
-        android:label="MainFragment" />
+        android:label="MainFragment">
+        <action
+            android:id="@+id/action_mainFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/fragment_back_in"
+            app:exitAnim="@anim/fragment_back_out"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/fragment_in"
+            app:popExitAnim="@anim/fragment_out"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 </navigation>

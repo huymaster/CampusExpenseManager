@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.github.huymaster.campusexpensemanager.MainApplication;
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
+import com.github.huymaster.campusexpensemanager.core.ResourceFunctions;
 import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
 import com.github.huymaster.campusexpensemanager.database.sqlite.dao.CredentialDAO;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
@@ -43,7 +44,9 @@ public class LoginFragment extends BaseFragment {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             var username = s.toString();
             if (username.length() == 0) return;
-            binding.loginButton.setText(dao.exists(username) ? R.string.login_button_login : R.string.login_button_signup);
+            var exists = dao.exists(username);
+            binding.loginButton.setText(exists ? R.string.login_button_login : R.string.login_button_signup);
+            binding.loginButton.setIcon(exists ? ResourceFunctions.getDrawable(R.drawable.ic_login) : ResourceFunctions.getDrawable(R.drawable.ic_person_add));
         }
     };
 
