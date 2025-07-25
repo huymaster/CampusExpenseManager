@@ -1,4 +1,4 @@
 <resources>
 
-    <style name="Base.Theme.CampusExpenseManager" parent="Theme.Material3.DynamicColors.Dark" />
+    <style name="Base.Theme.CampusExpenseManager" parent="Theme.Material3Expressive.DynamicColors.Dark" />
 </resources>

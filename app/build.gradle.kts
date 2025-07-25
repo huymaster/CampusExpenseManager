@@ -68,6 +68,10 @@ kotlin {
     jvmToolchain(21)
 }
 
+hilt {
+    enableAggregatingTask = true
+}
+
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -91,6 +95,7 @@ dependencies {
     implementation(libs.realm)
     implementation(libs.guava)
     implementation(libs.hilt)
+    implementation(libs.dagger.android.support)
     ksp(libs.hilt.compiler)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
@@ -101,6 +106,8 @@ dependencies {
     runtimeOnly(libs.compose.bom)
     implementation(libs.core.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.hilt.testing)
+    testAnnotationProcessor(libs.hilt.compiler)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.hilt.testing)

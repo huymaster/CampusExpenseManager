@@ -8,16 +8,14 @@
         android:background="?attr/colorPrimaryContainer"
         android:gravity="start"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="48dp"
-        android:paddingBottom="16dp">
+        android:padding="16dp">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/navigation_header_image"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:padding="4dp"
-            android:paddingTop="32dp"
+            android:paddingTop="16dp"
             android:src="@drawable/ic_launcher_foreground_2"
             app:shapeAppearance="@style/circleImage" />
 
@@ -26,7 +24,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:foregroundTint="?attr/colorOnPrimaryContainer"
-            android:text="@string/app_name"
-            android:textSize="18sp" />
+            android:text="Đạt 09"
+            android:textSize="24sp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/navigation_header_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:foregroundTint="?attr/colorOnPrimaryContainer"
+            android:text="dat09"
+            android:textSize="12sp" />
     </LinearLayout>
 </layout>

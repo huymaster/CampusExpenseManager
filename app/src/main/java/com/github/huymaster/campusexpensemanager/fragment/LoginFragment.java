@@ -22,17 +22,27 @@ import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class LoginFragment extends BaseFragment {
-    private static final String TAG = "LoginFragment";
+    @Inject
+    UserViewModel viewModel;
     private LoginFragmentBinding binding;
     private CredentialDAO dao;
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
-            for (int i = 0; i < s.length(); i++) {
-                if (s.charAt(i) == ' ') {
-                    s.delete(i, i + 1);
-                }
+            if (s.length() == 0) return;
+            var u = s.charAt(s.length() - 1);
+            if (u >= 'A' && u <= 'Z') {
+                s.delete(s.length() - 1, s.length());
+                s.append(Character.toLowerCase(u));
+            }
+            if (u == ' ') {
+                s.delete(s.length() - 1, s.length());
             }
         }
 
@@ -89,7 +99,7 @@ public class LoginFragment extends BaseFragment {
             binding.loginUsername.setText(username);
             binding.loginPassword.setText(password);
         }
-        UserViewModel.INSTANCE.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
+        viewModel.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
             binding.loginButton.setEnabled(username == null);
             if (username != null) {
                 getNavController().navigate(R.id.action_loginFragment_to_mainFragment);
@@ -145,7 +155,7 @@ public class LoginFragment extends BaseFragment {
         }
         var result = dao.get(username).checkPassword(password);
         if (result) {
-            UserViewModel.INSTANCE.login(username);
+            viewModel.login(username);
             ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
         } else {
             ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);

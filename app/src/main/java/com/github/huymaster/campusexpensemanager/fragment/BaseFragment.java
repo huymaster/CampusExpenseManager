@@ -13,6 +13,8 @@ import com.github.huymaster.campusexpensemanager.R;
 import java.util.function.Function;
 
 public abstract class BaseFragment extends Fragment {
+    protected String TAG = getClass().getSimpleName();
+
     protected MainActivity getMainActivity() {
         try {
             return (MainActivity) requireActivity();

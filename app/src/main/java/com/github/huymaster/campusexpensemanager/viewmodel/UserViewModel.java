@@ -6,11 +6,23 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.Objects;
 
+import dagger.Module;
+import dagger.Provides;
+import dagger.hilt.InstallIn;
+import dagger.hilt.components.SingletonComponent;
+
+@Module
+@InstallIn(SingletonComponent.class)
 public class UserViewModel extends ViewModel {
     public static UserViewModel INSTANCE = new UserViewModel();
     private final MutableLiveData<String> loggedInUsername = new MutableLiveData<>(null);
 
     private UserViewModel() {
+    }
+
+    @Provides
+    public static UserViewModel provideUserViewModel() {
+        return INSTANCE;
     }
 
     public LiveData<String> getLoggedInState() {

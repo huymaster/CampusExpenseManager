@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="Base.Theme.CampusExpenseManager" parent="Theme.Material3.DynamicColors.Light" />
+    <style name="Base.Theme.CampusExpenseManager" parent="Theme.Material3Expressive.DynamicColors.Light" />
 
     <style name="Theme.CampusExpenseManager" parent="Base.Theme.CampusExpenseManager">
         <item name="windowActionBar">false</item>

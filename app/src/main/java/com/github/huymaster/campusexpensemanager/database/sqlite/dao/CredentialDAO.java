@@ -59,7 +59,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         return credentials;
     }
 
-    public Credential get(String username) {
+    public Credential get(String u) {
+        String username = u.toLowerCase();
         String[] columns = {Credential.CredentialEntry.COLUMN_USERNAME, Credential.CredentialEntry.COLUMN_PASSWORD};
         String selection = Credential.CredentialEntry.COLUMN_USERNAME + " = ?";
         String[] selectionArgs = {username};
@@ -80,7 +81,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         return null;
     }
 
-    public boolean insert(String username, String password) {
+    public boolean insert(String u, String password) {
+        String username = u.toLowerCase();
         if (exists(username)) return false;
 
         ContentValues values = new ContentValues();
@@ -94,7 +96,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         return insert;
     }
 
-    public boolean updateCredential(String username, String oldPassword, String newPassword) {
+    public boolean updateCredential(String u, String oldPassword, String newPassword) {
+        String username = u.toLowerCase();
         if (!exists(username)) return false;
 
         Credential credential = get(username);
@@ -114,7 +117,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         return update;
     }
 
-    public boolean deleteCredential(String username) {
+    public boolean deleteCredential(String u) {
+        String username = u.toLowerCase();
         if (!exists(username)) return false;
 
         String whereClause = Credential.CredentialEntry.COLUMN_USERNAME + " = ?";
@@ -127,7 +131,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         return delete;
     }
 
-    public boolean exists(String username) {
+    public boolean exists(String u) {
+        String username = u.toLowerCase();
         return get(username) != null;
     }
 }

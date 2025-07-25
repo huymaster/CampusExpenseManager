@@ -1,6 +1,7 @@
 package com.github.huymaster.campusexpensemanager;
 
 import android.os.Bundle;
+import android.view.WindowManager;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -12,9 +13,7 @@ import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import dagger.hilt.android.WithFragmentBindings;
 
-@WithFragmentBindings
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
     private final OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
@@ -37,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
 
         binding = MainActivityBinding.inflate(getLayoutInflater());

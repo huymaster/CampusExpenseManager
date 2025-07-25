@@ -44,6 +44,7 @@ public class MainApplication extends Application {
         isDebug = BuildConfig.DEBUG;
         INSTANCE = this;
         super.onCreate();
+
         DynamicColors.applyToActivitiesIfAvailable(this);
         preferences = new ApplicationPreferences(this);
         notification = new NotificationUtils(this);
