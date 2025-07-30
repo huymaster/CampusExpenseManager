@@ -15,13 +15,13 @@ import androidx.lifecycle.LifecycleOwner;
 import com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import io.realm.Realm;
 import io.realm.RealmModel;
@@ -215,19 +215,23 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
 
     public Future<T> updateAsync(@NonNull Predicate<T> selector, Consumer<T> updater) {
         return IO_SERVICE.submit(() -> {
-            T unmanaged = getUnmanaged(get(selector));
             semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 final AtomicReference<T> managedRef = new AtomicReference<>();
                 realm.executeTransaction(r -> {
-                    if (unmanaged == null) return;
-                    updater.accept(unmanaged);
-                    r.insertOrUpdate(unmanaged);
-                    managedRef.set(unmanaged);
+                    RealmResults<T> ts = r.where(getType()).findAll();
+                    if (ts == null) return;
+                    T managed = ts.stream()
+                            .filter(selector::test)
+                            .findFirst()
+                            .orElse(null);
+                    if (managed == null) return;
+                    updater.accept(managed);
+                    managedRef.set(managed);
                 });
                 return getUnmanaged(managedRef.get());
             } catch (Exception e) {
-                Log.w(TAG, "Error while updating object [" + unmanaged + "]", e);
+                Log.w(TAG, "Error while updating object", e);
                 return null;
             } finally {
                 semaphore.release();
@@ -246,22 +250,21 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
 
     public Future<Long> deleteAsync(@NonNull Predicate<T> selector) {
         return IO_SERVICE.submit(() -> {
-            List<T> unmanaged = getUnmanagedI(getAll(LinkedList::new, selector));
             semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 final AtomicReference<Long> deleted = new AtomicReference<>(0L);
-                if (unmanaged != null) {
-                    realm.executeTransaction(r -> {
-                        for (T obj : unmanaged) {
-                            try {
-                                RealmObject.deleteFromRealm(obj);
-                                deleted.set(deleted.get() + 1);
-                            } catch (Exception e) {
-                                Log.w(TAG, "Error while deleting object [" + obj + "]", e);
-                            }
+                realm.executeTransaction(r -> {
+                    RealmResults<T> ts = realm.where(getType()).findAll();
+                    Stream<T> managed = ts.stream().filter(selector::test);
+                    managed.forEach(obj -> {
+                        try {
+                            RealmObject.deleteFromRealm(obj);
+                            deleted.set(deleted.get() + 1);
+                        } catch (Exception e) {
+                            Log.w(TAG, "Error while deleting object [" + obj + "]", e);
                         }
                     });
-                }
+                });
                 return deleted.get();
             } catch (Exception e) {
                 Log.w(TAG, "Error while deleting object", e);
@@ -270,6 +273,44 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
                 semaphore.release();
             }
         });
+    }
+
+    public long delete(@NonNull Predicate<T> selector) {
+        try {
+            return deleteAsync(selector).get();
+        } catch (Exception e) {
+            Log.w(TAG, "Error while deleting object", e);
+        }
+        return -1L;
+    }
+
+    public Future<Long> deleteAllAsync() {
+        return IO_SERVICE.submit(() -> {
+            semaphore.acquireUninterruptibly();
+            try (Realm realm = databaseCore.getRealm()) {
+                final AtomicReference<Long> deleted = new AtomicReference<>(0L);
+                realm.executeTransaction(r -> {
+                    RealmResults<T> ts = realm.where(getType()).findAll();
+                    ts.deleteAllFromRealm();
+                    deleted.set((long) ts.size());
+                });
+                return deleted.get();
+            } catch (Exception e) {
+                Log.w(TAG, "Error while deleting all objects", e);
+                return -1L;
+            } finally {
+                semaphore.release();
+            }
+        });
+    }
+
+    public long deleteAll() {
+        try {
+            return deleteAllAsync().get();
+        } catch (Exception e) {
+            Log.w(TAG, "Error while deleting all objects", e);
+        }
+        return -1L;
     }
 
     public boolean exists(Predicate<T> selector) {

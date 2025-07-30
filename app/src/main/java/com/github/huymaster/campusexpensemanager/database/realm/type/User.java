@@ -1,5 +1,7 @@
 package com.github.huymaster.campusexpensemanager.database.realm.type;
 
+import androidx.annotation.NonNull;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -59,5 +61,11 @@ public class User extends RealmObject {
 
     public void setExpenses(RealmList<Expense> expenses) {
         this.expenses = expenses;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "User[" + username + "]";
     }
 }

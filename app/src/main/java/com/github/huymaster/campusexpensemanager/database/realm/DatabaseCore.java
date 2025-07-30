@@ -19,10 +19,13 @@ public class DatabaseCore {
     private final Context context;
 
     public DatabaseCore(Context context) {
+        this(context, null);
+    }
+
+    public DatabaseCore(Context context, RealmConfiguration configuration) {
         this.context = context;
         Realm.init(context);
-        Realm realm = Realm.getInstance(getDefaultConfiguration());
-        realm.close();
+        Realm.setDefaultConfiguration(configuration == null ? getDefaultConfiguration() : configuration);
     }
 
     private RealmConfiguration getDefaultConfiguration() {
@@ -34,7 +37,7 @@ public class DatabaseCore {
     }
 
     public Realm getRealm() {
-        return Realm.getInstance(getDefaultConfiguration());
+        return Realm.getDefaultInstance();
     }
 
     public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz) {
