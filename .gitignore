@@ -357,3 +357,5 @@ google-services.json
 # Android Profiling
 *.hprof
 
+/app/src/androidTest/java/com/github/huymaster/campusexpensemanager/
+/app/src/test/java/com/github/huymaster/campusexpensemanager/
