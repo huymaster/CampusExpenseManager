@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.realm.Realm;
@@ -31,7 +30,6 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
     protected static final String SUPER_TAG = "BaseDAO";
     protected final ExecutorService IO_SERVICE = Executors.newSingleThreadExecutor();
     protected final String TAG = getClass().getSimpleName();
-    private final Semaphore semaphore = new Semaphore(1);
     private final DatabaseCore databaseCore;
     private final Lifecycle lifecycle;
 
@@ -60,7 +58,7 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
         return null;
     }
 
-    protected List<T> getUnmanagedI(Iterable<T> managed) {
+    protected List<T> getUnmanagedIterable(Iterable<T> managed) {
         if (managed == null) return null;
         try (Realm realm = databaseCore.getRealm()) {
             return realm.copyFromRealm(managed);
@@ -72,19 +70,14 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
 
     public Future<T> getAsync(@NonNull Consumer<RealmQuery<T>> selector) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 RealmQuery<T> query = realm.where(getType());
                 selector.accept(query);
-                RealmResults<T> ts = query.findAll();
-                if (ts == null) return null;
-                T managed = ts.first(null);
+                T managed = query.findFirst();
                 return getUnmanaged(managed);
             } catch (Exception e) {
                 Log.w(TAG, "Error while getting object", e);
                 return null;
-            } finally {
-                semaphore.release();
             }
         });
     }
@@ -100,12 +93,11 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
 
     public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 C container = supplier.get();
                 RealmResults<T> ts = realm.where(getType()).findAll();
                 if (ts != null) {
-                    var unmanaged = getUnmanagedI(ts);
+                    var unmanaged = getUnmanagedIterable(ts);
                     container.clear();
                     container.addAll(unmanaged);
                 }
@@ -113,22 +105,19 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
             } catch (Exception e) {
                 Log.w(TAG, "Error while getting all objects", e);
                 return supplier.get();
-            } finally {
-                semaphore.release();
             }
         });
     }
 
     public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier, @NonNull Consumer<RealmQuery<T>> selector) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 C container = supplier.get();
                 RealmQuery<T> query = realm.where(getType());
                 selector.accept(query);
                 RealmResults<T> ts = query.findAll();
                 if (ts != null) {
-                    var unmanaged = getUnmanagedI(ts);
+                    var unmanaged = getUnmanagedIterable(ts);
                     container.clear();
                     container.addAll(unmanaged);
                 }
@@ -136,8 +125,6 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
             } catch (Exception e) {
                 Log.w(TAG, "Error while getting all objects", e);
                 return supplier.get();
-            } finally {
-                semaphore.release();
             }
         });
     }
@@ -162,7 +149,6 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
 
     public Future<T> createAsync(Consumer<T> creator) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 final AtomicReference<T> managedRef = new AtomicReference<>();
                 realm.executeTransaction(r -> {
@@ -171,15 +157,15 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
                     managedRef.set(managed);
                 });
                 return getUnmanaged(managedRef.get());
-            } finally {
-                semaphore.release();
+            } catch (Exception e) {
+                Log.w(TAG, "Error while creating object", e);
             }
+            return null;
         });
     }
 
     public Future<T> createAsync(Consumer<T> creator, Object primaryKey) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 final AtomicReference<T> managedRef = new AtomicReference<>();
                 realm.executeTransaction(r -> {
@@ -188,9 +174,10 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
                     managedRef.set(managed);
                 });
                 return getUnmanaged(managedRef.get());
-            } finally {
-                semaphore.release();
+            } catch (Exception e) {
+                Log.w(TAG, "Error while creating object with primary key", e);
             }
+            return null;
         });
     }
 
@@ -212,71 +199,55 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
         return null;
     }
 
-    public Future<T> updateAsync(@NonNull Consumer<RealmQuery<T>> selector, Consumer<T> updater) {
+    public Future<Long> updateAsync(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
+            final AtomicReference<Long> updatedCount = new AtomicReference<>(0L);
             try (Realm realm = databaseCore.getRealm()) {
-                final AtomicReference<T> managedRef = new AtomicReference<>();
                 realm.executeTransaction(r -> {
                     RealmQuery<T> query = r.where(getType());
                     selector.accept(query);
-                    RealmResults<T> ts = query.findAll();
-                    if (ts == null) return;
-                    T managed = ts.stream()
-                            .findFirst()
-                            .orElse(null);
-                    if (managed == null) return;
-                    updater.accept(managed);
-                    managedRef.set(managed);
+                    RealmResults<T> results = query.findAll();
+                    results.forEach(updater::accept);
+                    updatedCount.set((long) results.size());
                 });
-                return getUnmanaged(managedRef.get());
+                return updatedCount.get();
             } catch (Exception e) {
-                Log.w(TAG, "Error while updating object", e);
-                return null;
-            } finally {
-                semaphore.release();
+                Log.w(TAG, "Error while updating all objects", e);
+                return -1L;
             }
         });
     }
 
-    public T update(@NonNull Consumer<RealmQuery<T>> selector, Consumer<T> updater) {
+    public Long update(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
         try {
             return updateAsync(selector, updater).get();
         } catch (Exception e) {
-            Log.w(TAG, "Error while updating object", e);
+            Log.w(TAG, "Error while updating all objects", e);
         }
-        return null;
+        return -1L;
     }
 
     public Future<Long> deleteAsync(@NonNull Consumer<RealmQuery<T>> selector) {
         return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
             try (Realm realm = databaseCore.getRealm()) {
                 final AtomicReference<Long> deleted = new AtomicReference<>(0L);
                 realm.executeTransaction(r -> {
                     RealmQuery<T> query = r.where(getType());
                     selector.accept(query);
                     RealmResults<T> ts = query.findAll();
-                    ts.forEach(obj -> {
-                        try {
-                            RealmObject.deleteFromRealm(obj);
-                            deleted.set(deleted.get() + 1);
-                        } catch (Exception e) {
-                            Log.w(TAG, "Error while deleting object [" + obj + "]", e);
-                        }
-                    });
+                    long size = ts.size();
+                    deleted.set(size);
+                    ts.deleteAllFromRealm();
                 });
                 return deleted.get();
             } catch (Exception e) {
                 Log.w(TAG, "Error while deleting object", e);
                 return -1L;
-            } finally {
-                semaphore.release();
             }
         });
     }
 
-    public long delete(@NonNull Consumer<RealmQuery<T>> selector) {
+    public Long delete(@NonNull Consumer<RealmQuery<T>> selector) {
         try {
             return deleteAsync(selector).get();
         } catch (Exception e) {
@@ -286,26 +257,11 @@ public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleO
     }
 
     public Future<Long> deleteAllAsync() {
-        return IO_SERVICE.submit(() -> {
-            semaphore.acquireUninterruptibly();
-            try (Realm realm = databaseCore.getRealm()) {
-                final AtomicReference<Long> deleted = new AtomicReference<>(0L);
-                realm.executeTransaction(r -> {
-                    RealmResults<T> ts = realm.where(getType()).findAll();
-                    deleted.set((long) ts.size());
-                    ts.deleteAllFromRealm();
-                });
-                return deleted.get();
-            } catch (Exception e) {
-                Log.w(TAG, "Error while deleting all objects", e);
-                return -1L;
-            } finally {
-                semaphore.release();
-            }
+        return deleteAsync(t -> {
         });
     }
 
-    public long deleteAll() {
+    public Long deleteAll() {
         try {
             return deleteAllAsync().get();
         } catch (Exception e) {
