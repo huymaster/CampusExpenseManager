@@ -60,7 +60,10 @@ public class InstrumentedTest {
         }
         List<User> users = dao.getAll(LinkedList::new);
         Log.d(TAG, "Users: " + users);
-        Log.d(TAG, "Deleted user start with 'a': " + dao.delete(u -> u.getUsername().startsWith("a")));
+        Log.d(TAG, "Deleted user start with 'a': " + dao.delete(q -> q.beginsWith("username", "a")));
+        dao.getAll(() -> users);
+        Log.d(TAG, "Users: " + users);
+        Log.d(TAG, "Delete all user: " + dao.deleteAll());
         dao.getAll(() -> users);
         Log.d(TAG, "Users: " + users);
     }
