@@ -29,6 +29,11 @@ public class UserViewModel extends ViewModel {
         return loggedInUsername;
     }
 
+
+    public String getLoggedInUsername() {
+        return loggedInUsername.getValue();
+    }
+
     public void login(String username) {
         if (!Objects.equals(loggedInUsername.getValue(), username))
             loggedInUsername.setValue(username);

@@ -1,6 +1,7 @@
 package com.github.huymaster.campusexpensemanager;
 
 import android.app.Application;
+import android.os.Handler;
 
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.NotificationUtils;
@@ -18,7 +19,6 @@ public class MainApplication extends Application {
     private com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore realmDatabaseCore;
     private com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore sqliteDatabaseCore;
 
-
     public static boolean isDebug() {
         return INSTANCE.isDebug;
     }
@@ -35,20 +35,38 @@ public class MainApplication extends Application {
         return INSTANCE.realmDatabaseCore;
     }
 
+    public static void createLibraries() {
+        INSTANCE.init();
+    }
+
     public static com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore getSqliteDatabaseCore() {
         return INSTANCE.sqliteDatabaseCore;
     }
 
+    public static boolean allInstancesCreated() {
+        return INSTANCE != null &&
+                INSTANCE.preferences != null &&
+                INSTANCE.notification != null &&
+                INSTANCE.realmDatabaseCore != null &&
+                INSTANCE.sqliteDatabaseCore != null;
+    }
+
     @Override
     public void onCreate() {
-        isDebug = BuildConfig.DEBUG;
         INSTANCE = this;
         super.onCreate();
+    }
 
-        DynamicColors.applyToActivitiesIfAvailable(this);
-        preferences = new ApplicationPreferences(this);
-        notification = new NotificationUtils(this);
-        realmDatabaseCore = new com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore(this);
-        sqliteDatabaseCore = new com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore(this);
+    private void init() {
+        if (INSTANCE != this || allInstancesCreated()) return;
+        Handler handler = new Handler();
+        handler.post(() -> {
+            isDebug = BuildConfig.DEBUG;
+            DynamicColors.applyToActivitiesIfAvailable(this);
+            preferences = new ApplicationPreferences(this);
+            notification = new NotificationUtils(this);
+            realmDatabaseCore = new com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore(this);
+            sqliteDatabaseCore = new com.github.huymaster.campusexpensemanager.database.sqlite.DatabaseCore(this);
+        });
     }
 }

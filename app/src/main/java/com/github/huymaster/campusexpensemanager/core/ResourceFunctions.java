@@ -1,5 +1,6 @@
 package com.github.huymaster.campusexpensemanager.core;
 
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
@@ -22,6 +23,10 @@ public class ResourceFunctions {
 
     private static Resources.Theme getTheme() {
         return MainApplication.INSTANCE.getTheme();
+    }
+
+    public static boolean isDarkTheme() {
+        return (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
     }
 
     public static Drawable getDrawable(@DrawableRes int id) {

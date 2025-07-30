@@ -16,6 +16,7 @@ import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
 import com.github.huymaster.campusexpensemanager.core.ResourceFunctions;
 import com.github.huymaster.campusexpensemanager.core.ViewFunctions;
+import com.github.huymaster.campusexpensemanager.database.realm.dao.UserDAO;
 import com.github.huymaster.campusexpensemanager.database.sqlite.dao.CredentialDAO;
 import com.github.huymaster.campusexpensemanager.databinding.LoginFragmentBinding;
 import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
@@ -59,14 +60,21 @@ public class LoginFragment extends BaseFragment {
             binding.loginButton.setIcon(exists ? ResourceFunctions.getDrawable(R.drawable.ic_login) : ResourceFunctions.getDrawable(R.drawable.ic_person_add));
         }
     };
+    private UserDAO userDao;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = LoginFragmentBinding.inflate(inflater, container, false);
         dao = MainApplication.getSqliteDatabaseCore().getCredentialDAO(this);
-        init();
+        userDao = MainApplication.getRealmDatabaseCore().getDAO(UserDAO.class);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        init();
     }
 
     @Override
@@ -77,7 +85,6 @@ public class LoginFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        save();
     }
 
     @Override
@@ -157,6 +164,7 @@ public class LoginFragment extends BaseFragment {
         if (result) {
             viewModel.login(username);
             ViewFunctions.showSnackbar(binding, R.string.login_success, Snackbar.LENGTH_SHORT);
+            save();
         } else {
             ViewFunctions.showSnackbar(binding, R.string.login_error_invalid, Snackbar.LENGTH_SHORT);
         }
@@ -165,6 +173,10 @@ public class LoginFragment extends BaseFragment {
     private void signup(String username, String password) {
         if (dao.exists(username)) {
             ViewFunctions.showSnackbar(binding, R.string.login_signup_exists, Snackbar.LENGTH_SHORT);
+            return;
+        }
+        if (password.length() < 6) {
+            ViewFunctions.showSnackbar(binding, R.string.login_signup_password_length, Snackbar.LENGTH_SHORT);
             return;
         }
         var result = dao.insert(username, password);

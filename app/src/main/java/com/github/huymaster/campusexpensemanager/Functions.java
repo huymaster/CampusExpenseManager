@@ -18,6 +18,7 @@ import java.util.List;
 
 public class Functions {
     public static void setupInsets(ViewBinding binding) {
+        if (binding == null) return;
         Thread thread = new Thread(() -> {
             View root = binding.getRoot();
             OnApplyWindowInsetsListener listener = (v, insets) -> {

@@ -85,6 +85,8 @@ public class CredentialDAO implements DefaultLifecycleObserver {
         String username = u.toLowerCase();
         if (exists(username)) return false;
 
+        if (password.length() < 6) return false;
+
         ContentValues values = new ContentValues();
         values.put(Credential.CredentialEntry.COLUMN_USERNAME, username);
         values.put(Credential.CredentialEntry.COLUMN_PASSWORD, Credential.hashPassword(password));

@@ -1,9 +1,10 @@
 package com.github.huymaster.campusexpensemanager.database.realm;
 
 import android.content.Context;
-import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.github.huymaster.campusexpensemanager.database.realm.dao.BaseDAO;
 
@@ -21,16 +22,14 @@ public class DatabaseCore {
         this.context = context;
         Realm.init(context);
         Realm realm = Realm.getInstance(getDefaultConfiguration());
-        Log.d(TAG, "Realm version: " + realm.getVersion());
-        Log.d(TAG, "Realm path: " + realm.getPath());
         realm.close();
     }
 
     private RealmConfiguration getDefaultConfiguration() {
         return new RealmConfiguration.Builder()
-                .directory(context.getFilesDir())
-                .name("database.realm")
+                .modules(DatabaseModules.INSTANCE)
                 .deleteRealmIfMigrationNeeded()
+                .name("database.realm")
                 .build();
     }
 
@@ -38,7 +37,12 @@ public class DatabaseCore {
         return Realm.getInstance(getDefaultConfiguration());
     }
 
-    public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz, Lifecycle lifecycle) {
+    public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz) {
+        return getDAO(clazz, null);
+    }
+
+    public <T extends RealmModel, V extends BaseDAO<T>> V getDAO(Class<V> clazz, @Nullable Lifecycle lifecycle) {
+        if (lifecycle == null) lifecycle = ProcessLifecycleOwner.get().getLifecycle();
         try {
             Constructor<V> constructor = clazz.getDeclaredConstructor(DatabaseCore.class, Lifecycle.class);
             constructor.setAccessible(true);

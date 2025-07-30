@@ -8,6 +8,7 @@ appcompat = "1.7.1"
 material = "1.14.0-alpha03"
 activity = "1.11.0-rc01"
 constraintlayout = "2.2.1"
+splashscreen = "1.2.0-rc01"
 cardview = "1.0.0"
 gridlayout = "1.1.0"
 recyclerview = "1.4.0"
@@ -23,6 +24,11 @@ lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 ktx = "1.16.0"
 hilt = "2.57"
+mockito = "5.18.0"
+powermock = "2.0.9"
+robolectric = "4.15.1"
+androidx-test-rules = "1.6.1"
+androidx-test-runner = "1.6.2"
 ksp = "2.2.0+"
 
 [libraries]
@@ -34,6 +40,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 gridlayout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "gridlayout" }
 recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
@@ -62,6 +69,14 @@ hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt
 dagger-android-support = { group = "com.google.dagger", name = "dagger-android-support", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+powermock = { group = "org.powermock", name = "powermock-api-mockito2", version.ref = "powermock" }
+powermock-junit4 = { group = "org.powermock", name = "powermock-module-junit4", version.ref = "powermock" }
+powermock-junit4-rule = { group = "org.powermock", name = "powermock-module-junit4-rule", version.ref = "powermock" }
+powermock-xstream = { group = "org.powermock", name = "powermock-classloading-xstream", version.ref = "powermock" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidx-test-rules" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

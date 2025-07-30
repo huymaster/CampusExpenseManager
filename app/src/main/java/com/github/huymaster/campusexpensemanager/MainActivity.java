@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
 
+        getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
         binding = MainActivityBinding.inflate(getLayoutInflater());
         Functions.setupInsets(binding);
         setContentView(binding.getRoot());

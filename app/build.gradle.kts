@@ -1,13 +1,14 @@
 plugins {
     idea
     alias(libs.plugins.android.application)
-    id("realm-android")
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
-    id("kotlin-kapt")
 }
+
+apply { plugin("org.jetbrains.kotlin.kapt") }
+apply { plugin("realm-android") }
 
 idea {
     module {
@@ -24,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "com.github.huymaster.campusexpensemanager"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -62,6 +63,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 kotlin {
@@ -77,6 +84,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.splashscreen)
     implementation(libs.cardview)
     implementation(libs.gridlayout)
     implementation(libs.recyclerview)
@@ -96,20 +104,34 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.hilt)
     implementation(libs.dagger.android.support)
+    implementation(libs.work.runtime)
+    implementation(libs.core.ktx)
+
+    runtimeOnly(libs.compose.bom)
+
     ksp(libs.hilt.compiler)
+
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
-    debugImplementation(libs.ui.test.manifest)
-    testImplementation(libs.ktorm.core)
-    implementation(libs.work.runtime)
-    runtimeOnly(libs.compose.bom)
-    implementation(libs.core.ktx)
-    testImplementation(libs.junit)
-    testImplementation(libs.hilt.testing)
-    testAnnotationProcessor(libs.hilt.compiler)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.hilt.testing)
     androidTestAnnotationProcessor(libs.hilt.compiler)
+
+    debugImplementation(libs.ui.tooling)
+    debugImplementation(libs.ui.test.manifest)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.ktorm.core)
+    testImplementation(libs.mockito)
+    testImplementation(libs.powermock)
+    testImplementation(libs.powermock.junit4)
+    testImplementation(libs.powermock.junit4.rule)
+    testImplementation(libs.powermock.xstream)
+    testImplementation(libs.hilt.testing)
+
+    testAnnotationProcessor(libs.hilt.compiler)
 }

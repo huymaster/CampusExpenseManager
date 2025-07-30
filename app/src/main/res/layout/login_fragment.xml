@@ -12,7 +12,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/colorPrimaryContainer"
-            android:paddingTop="128dp"
+            android:paddingTop="96dp"
             android:paddingBottom="32dp">
 
             <com.google.android.material.imageview.ShapeableImageView
