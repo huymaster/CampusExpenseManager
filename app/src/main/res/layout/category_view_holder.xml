@@ -2,28 +2,29 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/category_view_holder_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp">
+        android:layout_margin="4dp"
+        android:clickable="true">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="16dp">
 
-            <com.google.android.material.textview.MaterialTextView
+            <TextView
                 android:id="@+id/category_view_holder_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
-            <com.google.android.material.textview.MaterialTextView
+            <TextView
                 android:id="@+id/category_view_holder_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/category_view_holder_name"
                 android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
-
-        </LinearLayout>
+        </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 </layout>

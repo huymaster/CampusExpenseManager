@@ -24,104 +24,101 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainFragment extends BaseFragment {
-    @Inject
-    UserViewModel viewModel;
-    private MainFragmentBinding binding;
-    private NavigationHeaderBinding navigationHeaderBinding;
+	@Inject
+	UserViewModel viewModel;
+	private MainFragmentBinding binding;
+	private NavigationHeaderBinding navigationHeaderBinding;
 
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = MainFragmentBinding.inflate(inflater, container, false);
-        navigationHeaderBinding = NavigationHeaderBinding.bind(binding.mainNavigationView.getHeaderView(0));
-        return binding.getRoot();
-    }
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		binding = MainFragmentBinding.inflate(inflater, container, false);
+		navigationHeaderBinding = NavigationHeaderBinding.bind(binding.mainNavigationView.getHeaderView(0));
+		return binding.getRoot();
+	}
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initComponents();
-        initListeners();
-    }
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		initComponents();
+		initListeners();
+	}
 
-    private void initListeners() {
-        binding.mainToolbar.setNavigationOnClickListener(v -> binding.mainDrawerLayout.open());
-        binding.mainNavigationView.setNavigationItemSelectedListener(this::menuItemListener);
-        viewModel.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
-            if (username == null)
-                getNavController().navigate(R.id.action_mainFragment_to_loginFragment);
-        });
-    }
+	private void initListeners() {
+		binding.mainToolbar.setNavigationOnClickListener(v -> binding.mainDrawerLayout.open());
+		binding.mainNavigationView.setNavigationItemSelectedListener(this::menuItemListener);
+		viewModel.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
+			if (username == null)
+				getNavController().navigate(R.id.action_mainFragment_to_loginFragment);
+		});
+	}
 
-    private void initComponents() {
-        binding.mainNavigationView.getMenu().setGroupCheckable(R.id.navigation_group, true, true);
-        binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
-        binding.mainFrameLayout.removeAllViews();
-    }
+	private void initComponents() {
+		binding.mainNavigationView.getMenu().setGroupCheckable(R.id.navigation_group, true, true);
+		binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
+		binding.mainFrameLayout.removeAllViews();
+	}
 
-    private boolean menuItemListener(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.navigation_home) {
-            binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
-            binding.mainFrameLayout.removeAllViews();
-            closeDrawer();
-            return true;
-        } else if (id == R.id.navigation_expenses) {
-            binding.mainNavigationView.setCheckedItem(R.id.navigation_expenses);
-            setFragment(new ExpensesFragment());
-            closeDrawer();
-            return true;
-        } else if (id == R.id.navigation_categories) {
-            binding.mainNavigationView.setCheckedItem(R.id.navigation_categories);
-            setFragment(new CategoriesFragment());
-            closeDrawer();
-            return true;
-        } else if (id == R.id.navigation_budget) {
-            binding.mainNavigationView.setCheckedItem(R.id.navigation_budget);
-            setFragment(new BudgetFragment());
-            closeDrawer();
-            return true;
-        } else if (id == R.id.navigation_settings) {
-            binding.mainNavigationView.setCheckedItem(R.id.navigation_settings);
-            setFragment(new SettingsFragment());
-            closeDrawer();
-            return true;
-        }
-        if (id == R.id.navigation_logout) {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getMainActivity());
-            builder.setTitle("Logout");
-            builder.setMessage(R.string.dialog_logout);
-            builder.setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
-                viewModel.logout();
-                getNavController().navigate(R.id.action_mainFragment_to_loginFragment);
-            });
-            builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
-            builder.show();
-            return true;
-        }
-        return false;
-    }
+	private boolean menuItemListener(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.navigation_home) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
+			binding.mainFrameLayout.removeAllViews();
+			closeDrawer();
+			return true;
+		} else if (id == R.id.navigation_expenses) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_expenses);
+			setFragment(new ExpensesFragment());
+			closeDrawer();
+			return true;
+		} else if (id == R.id.navigation_categories) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_categories);
+			setFragment(new CategoriesFragment());
+			closeDrawer();
+			return true;
+		} else if (id == R.id.navigation_budget) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_budget);
+			setFragment(new BudgetFragment());
+			closeDrawer();
+			return true;
+		} else if (id == R.id.navigation_settings) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_settings);
+			setFragment(new SettingsFragment());
+			closeDrawer();
+			return true;
+		}
+		if (id == R.id.navigation_logout) {
+			MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getMainActivity());
+			builder.setTitle("Logout");
+			builder.setMessage(R.string.dialog_logout);
+			builder.setPositiveButton(R.string.dialog_ok, (dialog, which) -> viewModel.logout());
+			builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
+			builder.show();
+			return true;
+		}
+		return false;
+	}
 
-    private void setFragment(Fragment fragment) {
-        if (fragment != null) {
-            FrameLayout frameLayout = binding.mainFrameLayout;
-            FragmentManager manager = getChildFragmentManager();
-            manager.beginTransaction().replace(R.id.main_frame_layout, fragment).commit();
-        }
-    }
+	private void setFragment(Fragment fragment) {
+		if (fragment != null) {
+			FrameLayout frameLayout = binding.mainFrameLayout;
+			FragmentManager manager = getChildFragmentManager();
+			manager.beginTransaction().replace(R.id.main_frame_layout, fragment).commit();
+		}
+	}
 
-    private void closeDrawer() {
-        binding.mainDrawerLayout.close();
-    }
+	private void closeDrawer() {
+		binding.mainDrawerLayout.close();
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
+	}
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		binding = null;
+	}
 }

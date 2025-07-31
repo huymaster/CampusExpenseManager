@@ -25,7 +25,12 @@
     <string name="login_signup_success">Sign up successful. Please login.</string>
 
     <!--CategoryFragment-->
-    <string name="categories_hint">Category name</string>
+    <string name="category_add_bottom_sheet_title">New Category</string>
+    <string name="category_edit_bottom_sheet_title">Edit Category</string>
+    <string name="category_bottom_sheet_name_hint">Category name</string>
+    <string name="category_bottom_sheet_description_hint">Category description</string>
+    <string name="category_bottom_sheet_add">Add</string>
+    <string name="category_bottom_sheet_save">Save</string>
 
     <!--ExpenseFragment-->
 
@@ -46,6 +51,7 @@
     <!--Dialog-->
     <string name="dialog_exit">Do you want to exit?</string>
     <string name="dialog_create_account">Do you want to create account \'%s\'?</string>
+    <string name="dialog_delete_category">Do you want to delete category \'%s\'?</string>
     <string name="dialog_logout">Do you want to logout?</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>

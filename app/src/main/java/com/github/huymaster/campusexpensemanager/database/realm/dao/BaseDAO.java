@@ -27,257 +27,258 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public abstract class BaseDAO<T extends RealmModel> implements DefaultLifecycleObserver {
-    protected static final String SUPER_TAG = "BaseDAO";
-    protected final ExecutorService IO_SERVICE = Executors.newSingleThreadExecutor();
-    protected final String TAG = getClass().getSimpleName();
-    private final DatabaseCore databaseCore;
-    private final Lifecycle lifecycle;
+	protected static final String SUPER_TAG = "BaseDAO";
+	protected final ExecutorService IO_SERVICE = Executors.newSingleThreadExecutor();
+	protected final ExecutorService DISPATCH_SERVICE = Executors.newFixedThreadPool(8);
+	protected final String TAG = getClass().getSimpleName();
+	private final DatabaseCore databaseCore;
+	private final Lifecycle lifecycle;
 
-    protected BaseDAO(DatabaseCore databaseCore, Lifecycle lifecycle) {
-        this.databaseCore = databaseCore;
-        this.lifecycle = lifecycle;
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> lifecycle.addObserver(this));
-    }
+	protected BaseDAO(DatabaseCore databaseCore, Lifecycle lifecycle) {
+		this.databaseCore = databaseCore;
+		this.lifecycle = lifecycle;
+		Handler handler = new Handler(Looper.getMainLooper());
+		handler.post(() -> lifecycle.addObserver(this));
+	}
 
-    public abstract Class<T> getType();
+	public abstract Class<T> getType();
 
-    protected T getUnmanaged(T managed) {
-        if (managed == null) return null;
-        try (Realm realm = databaseCore.getRealm()) {
-            if (!RealmObject.isValid(managed)) {
-                Log.w(TAG, "Object [" + managed + "] is not valid");
-                return null;
-            }
-            if (!RealmObject.isManaged(managed))
-                return managed;
-            return realm.copyFromRealm(managed);
-        } catch (Exception e) {
-            Log.w(TAG, "Error while getting unmanaged object", e);
-        }
-        return null;
-    }
+	protected T getUnmanaged(T managed) {
+		if (managed == null) return null;
+		try (Realm realm = databaseCore.getRealm()) {
+			if (!RealmObject.isValid(managed)) {
+				Log.w(TAG, "Object [" + managed + "] is not valid");
+				return null;
+			}
+			if (!RealmObject.isManaged(managed))
+				return managed;
+			return realm.copyFromRealm(managed);
+		} catch (Exception e) {
+			Log.w(TAG, "Error while getting unmanaged object", e);
+		}
+		return null;
+	}
 
-    protected List<T> getUnmanagedIterable(Iterable<T> managed) {
-        if (managed == null) return null;
-        try (Realm realm = databaseCore.getRealm()) {
-            return realm.copyFromRealm(managed);
-        } catch (Exception e) {
-            Log.w(TAG, "Error while getting unmanaged objects", e);
-        }
-        return null;
-    }
+	protected List<T> getUnmanagedIterable(Iterable<T> managed) {
+		if (managed == null) return null;
+		try (Realm realm = databaseCore.getRealm()) {
+			return realm.copyFromRealm(managed);
+		} catch (Exception e) {
+			Log.w(TAG, "Error while getting unmanaged objects", e);
+		}
+		return null;
+	}
 
-    public Future<T> getAsync(@NonNull Consumer<RealmQuery<T>> selector) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                RealmQuery<T> query = realm.where(getType());
-                selector.accept(query);
-                T managed = query.findFirst();
-                return getUnmanaged(managed);
-            } catch (Exception e) {
-                Log.w(TAG, "Error while getting object", e);
-                return null;
-            }
-        });
-    }
+	public Future<T> getAsync(@NonNull Consumer<RealmQuery<T>> selector) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				RealmQuery<T> query = realm.where(getType());
+				selector.accept(query);
+				T managed = query.findFirst();
+				return getUnmanaged(managed);
+			} catch (Exception e) {
+				Log.w(TAG, "Error while getting object", e);
+				return null;
+			}
+		});
+	}
 
-    public T get(@NonNull Consumer<RealmQuery<T>> selector) {
-        try {
-            return getAsync(selector).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while getting object", e);
-        }
-        return null;
-    }
+	public T get(@NonNull Consumer<RealmQuery<T>> selector) {
+		try {
+			return getAsync(selector).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while getting object", e);
+		}
+		return null;
+	}
 
-    public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                C container = supplier.get();
-                RealmResults<T> ts = realm.where(getType()).findAll();
-                if (ts != null) {
-                    var unmanaged = getUnmanagedIterable(ts);
-                    container.clear();
-                    container.addAll(unmanaged);
-                }
-                return container;
-            } catch (Exception e) {
-                Log.w(TAG, "Error while getting all objects", e);
-                return supplier.get();
-            }
-        });
-    }
+	public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				C container = supplier.get();
+				RealmResults<T> ts = realm.where(getType()).findAll();
+				if (ts != null) {
+					var unmanaged = getUnmanagedIterable(ts);
+					container.clear();
+					container.addAll(unmanaged);
+				}
+				return container;
+			} catch (Exception e) {
+				Log.w(TAG, "Error while getting all objects", e);
+				return supplier.get();
+			}
+		});
+	}
 
-    public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier, @NonNull Consumer<RealmQuery<T>> selector) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                C container = supplier.get();
-                RealmQuery<T> query = realm.where(getType());
-                selector.accept(query);
-                RealmResults<T> ts = query.findAll();
-                if (ts != null) {
-                    var unmanaged = getUnmanagedIterable(ts);
-                    container.clear();
-                    container.addAll(unmanaged);
-                }
-                return container;
-            } catch (Exception e) {
-                Log.w(TAG, "Error while getting all objects", e);
-                return supplier.get();
-            }
-        });
-    }
+	public <C extends Collection<T>> Future<C> getAllAsync(@NonNull Supplier<C> supplier, @NonNull Consumer<RealmQuery<T>> selector) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				C container = supplier.get();
+				RealmQuery<T> query = realm.where(getType());
+				selector.accept(query);
+				RealmResults<T> ts = query.findAll();
+				if (ts != null) {
+					var unmanaged = getUnmanagedIterable(ts);
+					container.clear();
+					container.addAll(unmanaged);
+				}
+				return container;
+			} catch (Exception e) {
+				Log.w(TAG, "Error while getting all objects", e);
+				return supplier.get();
+			}
+		});
+	}
 
-    public <C extends Collection<T>> C getAll(@NonNull Supplier<C> supplier) {
-        try {
-            return getAllAsync(supplier).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while getting all objects", e);
-        }
-        return supplier.get();
-    }
+	public <C extends Collection<T>> C getAll(@NonNull Supplier<C> supplier) {
+		try {
+			return getAllAsync(supplier).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while getting all objects", e);
+		}
+		return supplier.get();
+	}
 
-    public <C extends Collection<T>> C getAll(@NonNull Supplier<C> supplier, @NonNull Consumer<RealmQuery<T>> selector) {
-        try {
-            return getAllAsync(supplier, selector).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while getting all objects", e);
-        }
-        return supplier.get();
-    }
+	public <C extends Collection<T>> C getAll(@NonNull Supplier<C> supplier, @NonNull Consumer<RealmQuery<T>> selector) {
+		try {
+			return getAllAsync(supplier, selector).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while getting all objects", e);
+		}
+		return supplier.get();
+	}
 
-    public Future<T> createAsync(Consumer<T> creator) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                final AtomicReference<T> managedRef = new AtomicReference<>();
-                realm.executeTransaction(r -> {
-                    T managed = r.createObject(getType());
-                    creator.accept(managed);
-                    managedRef.set(managed);
-                });
-                return getUnmanaged(managedRef.get());
-            } catch (Exception e) {
-                Log.w(TAG, "Error while creating object", e);
-            }
-            return null;
-        });
-    }
+	public Future<T> createAsync(Consumer<T> creator) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				final AtomicReference<T> managedRef = new AtomicReference<>();
+				realm.executeTransaction(r -> {
+					T managed = r.createObject(getType());
+					creator.accept(managed);
+					managedRef.set(managed);
+				});
+				return getUnmanaged(managedRef.get());
+			} catch (Exception e) {
+				Log.w(TAG, "Error while creating object", e);
+			}
+			return null;
+		});
+	}
 
-    public Future<T> createAsync(Consumer<T> creator, Object primaryKey) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                final AtomicReference<T> managedRef = new AtomicReference<>();
-                realm.executeTransaction(r -> {
-                    T managed = r.createObject(getType(), primaryKey);
-                    creator.accept(managed);
-                    managedRef.set(managed);
-                });
-                return getUnmanaged(managedRef.get());
-            } catch (Exception e) {
-                Log.w(TAG, "Error while creating object with primary key", e);
-            }
-            return null;
-        });
-    }
+	public Future<T> createAsync(Consumer<T> creator, Object primaryKey) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				final AtomicReference<T> managedRef = new AtomicReference<>();
+				realm.executeTransaction(r -> {
+					T managed = r.createObject(getType(), primaryKey);
+					creator.accept(managed);
+					managedRef.set(managed);
+				});
+				return getUnmanaged(managedRef.get());
+			} catch (Exception e) {
+				Log.w(TAG, "Error while creating object with primary key", e);
+			}
+			return null;
+		});
+	}
 
-    public T create(Consumer<T> creator) {
-        try {
-            return createAsync(creator).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while creating object", e);
-        }
-        return null;
-    }
+	public T create(Consumer<T> creator) {
+		try {
+			return createAsync(creator).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while creating object", e);
+		}
+		return null;
+	}
 
-    public T create(Consumer<T> creator, Object primaryKey) {
-        try {
-            return createAsync(creator, primaryKey).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while creating object with primary key", e);
-        }
-        return null;
-    }
+	public T create(Consumer<T> creator, Object primaryKey) {
+		try {
+			return createAsync(creator, primaryKey).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while creating object with primary key", e);
+		}
+		return null;
+	}
 
-    public Future<Long> updateAsync(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
-        return IO_SERVICE.submit(() -> {
-            final AtomicReference<Long> updatedCount = new AtomicReference<>(0L);
-            try (Realm realm = databaseCore.getRealm()) {
-                realm.executeTransaction(r -> {
-                    RealmQuery<T> query = r.where(getType());
-                    selector.accept(query);
-                    RealmResults<T> results = query.findAll();
-                    results.forEach(updater::accept);
-                    updatedCount.set((long) results.size());
-                });
-                return updatedCount.get();
-            } catch (Exception e) {
-                Log.w(TAG, "Error while updating all objects", e);
-                return -1L;
-            }
-        });
-    }
+	public Future<Long> updateAsync(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
+		return IO_SERVICE.submit(() -> {
+			final AtomicReference<Long> updatedCount = new AtomicReference<>(0L);
+			try (Realm realm = databaseCore.getRealm()) {
+				realm.executeTransaction(r -> {
+					RealmQuery<T> query = r.where(getType());
+					selector.accept(query);
+					RealmResults<T> results = query.findAll();
+					results.forEach(updater::accept);
+					updatedCount.set((long) results.size());
+				});
+				return updatedCount.get();
+			} catch (Exception e) {
+				Log.w(TAG, "Error while updating all objects", e);
+				return -1L;
+			}
+		});
+	}
 
-    public Long update(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
-        try {
-            return updateAsync(selector, updater).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while updating all objects", e);
-        }
-        return -1L;
-    }
+	public Long update(@NonNull Consumer<RealmQuery<T>> selector, @NonNull Consumer<T> updater) {
+		try {
+			return updateAsync(selector, updater).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while updating all objects", e);
+		}
+		return -1L;
+	}
 
-    public Future<Long> deleteAsync(@NonNull Consumer<RealmQuery<T>> selector) {
-        return IO_SERVICE.submit(() -> {
-            try (Realm realm = databaseCore.getRealm()) {
-                final AtomicReference<Long> deleted = new AtomicReference<>(0L);
-                realm.executeTransaction(r -> {
-                    RealmQuery<T> query = r.where(getType());
-                    selector.accept(query);
-                    RealmResults<T> ts = query.findAll();
-                    long size = ts.size();
-                    deleted.set(size);
-                    ts.deleteAllFromRealm();
-                });
-                return deleted.get();
-            } catch (Exception e) {
-                Log.w(TAG, "Error while deleting object", e);
-                return -1L;
-            }
-        });
-    }
+	public Future<Long> deleteAsync(@NonNull Consumer<RealmQuery<T>> selector) {
+		return IO_SERVICE.submit(() -> {
+			try (Realm realm = databaseCore.getRealm()) {
+				final AtomicReference<Long> deleted = new AtomicReference<>(0L);
+				realm.executeTransaction(r -> {
+					RealmQuery<T> query = r.where(getType());
+					selector.accept(query);
+					RealmResults<T> ts = query.findAll();
+					long size = ts.size();
+					deleted.set(size);
+					ts.deleteAllFromRealm();
+				});
+				return deleted.get();
+			} catch (Exception e) {
+				Log.w(TAG, "Error while deleting object", e);
+				return -1L;
+			}
+		});
+	}
 
-    public Long delete(@NonNull Consumer<RealmQuery<T>> selector) {
-        try {
-            return deleteAsync(selector).get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while deleting object", e);
-        }
-        return -1L;
-    }
+	public Long delete(@NonNull Consumer<RealmQuery<T>> selector) {
+		try {
+			return deleteAsync(selector).get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while deleting object", e);
+		}
+		return -1L;
+	}
 
-    public Future<Long> deleteAllAsync() {
-        return deleteAsync(t -> {
-        });
-    }
+	public Future<Long> deleteAllAsync() {
+		return deleteAsync(t -> {
+		});
+	}
 
-    public Long deleteAll() {
-        try {
-            return deleteAllAsync().get();
-        } catch (Exception e) {
-            Log.w(TAG, "Error while deleting all objects", e);
-        }
-        return -1L;
-    }
+	public Long deleteAll() {
+		try {
+			return deleteAllAsync().get();
+		} catch (Exception e) {
+			Log.w(TAG, "Error while deleting all objects", e);
+		}
+		return -1L;
+	}
 
-    public boolean exists(Consumer<RealmQuery<T>> selector) {
-        return get(selector) != null;
-    }
+	public boolean exists(Consumer<RealmQuery<T>> selector) {
+		return get(selector) != null;
+	}
 
-    @Override
-    public void onDestroy(@NonNull LifecycleOwner owner) {
-        IO_SERVICE.shutdown();
-        lifecycle.removeObserver(this);
-        DefaultLifecycleObserver.super.onDestroy(owner);
-    }
+	@Override
+	public void onDestroy(@NonNull LifecycleOwner owner) {
+		IO_SERVICE.shutdown();
+		lifecycle.removeObserver(this);
+		DefaultLifecycleObserver.super.onDestroy(owner);
+	}
 }

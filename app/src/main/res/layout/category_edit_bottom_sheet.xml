@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="4dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/TextAppearance.AppCompat.Headline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/category_edit_bottom_sheet_title" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/category_edit_bottom_sheet_save_button"
+                style="@style/Widget.Material3Expressive.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_bottom_sheet_save"
+                app:icon="@drawable/ic_save" />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/category_edit_bottom_sheet_name_layout"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/category_bottom_sheet_name_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/category_edit_bottom_sheet_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/category_edit_bottom_sheet_description_layout"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/category_bottom_sheet_description_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/category_edit_bottom_sheet_description"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+</layout>
