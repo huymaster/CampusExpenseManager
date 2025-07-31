@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.splashscreen)
     implementation(libs.cardview)
     implementation(libs.gridlayout)
     implementation(libs.recyclerview)

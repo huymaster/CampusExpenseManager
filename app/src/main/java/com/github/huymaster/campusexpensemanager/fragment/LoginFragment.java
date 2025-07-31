@@ -111,9 +111,8 @@ public class LoginFragment extends BaseFragment {
 		}
 		viewModel.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
 			binding.loginButton.setEnabled(username == null);
-			if (username != null) {
+			if (username != null)
 				getNavController().navigate(R.id.action_loginFragment_to_mainFragment);
-			}
 		});
 	}
 

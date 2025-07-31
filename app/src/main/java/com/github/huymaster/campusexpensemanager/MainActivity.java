@@ -34,12 +34,11 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.initialization_fragment);
 
 		binding = MainActivityBinding.inflate(getLayoutInflater());
-		View rootView = binding.getRoot();
-		Functions.setupInsets(rootView);
-		setContentView(rootView);
+		View root = binding.getRoot();
+		Functions.setupInsets(root);
+		setContentView(root);
 
 		getOnBackPressedDispatcher().addCallback(onBackPressedCallback);
 	}

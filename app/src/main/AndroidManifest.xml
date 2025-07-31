@@ -27,7 +27,8 @@
         <activity
             android:name=".EntryActivity"
             android:exported="true"
-            android:screenOrientation="fullSensor">
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,8 +38,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
+            android:screenOrientation="user"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="DiscouragedApi" />
 
         <provider
             android:name="com.github.huymaster.campusexpensemanager.provider.RealmFileProvider"
@@ -50,5 +52,4 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
-
 </manifest>
