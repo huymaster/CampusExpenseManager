@@ -2,8 +2,6 @@ package com.github.huymaster.campusexpensemanager;
 
 import android.app.Application;
 
-import com.google.android.material.color.DynamicColors;
-
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
@@ -14,7 +12,6 @@ public class MainApplication extends Application {
 
 	public MainApplication() {
 		super();
-		INSTANCE = this;
 		isDebug = BuildConfig.DEBUG;
 	}
 
@@ -25,6 +22,6 @@ public class MainApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		DynamicColors.applyToActivitiesIfAvailable(this);
+		INSTANCE = this;
 	}
 }
