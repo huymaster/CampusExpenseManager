@@ -11,35 +11,30 @@ import androidx.annotation.Nullable;
 import com.github.huymaster.campusexpensemanager.databinding.BudgetFragmentBinding;
 
 public class BudgetFragment extends BaseFragment {
-    private BudgetFragmentBinding binding;
+	private BudgetFragmentBinding binding;
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = BudgetFragmentBinding.inflate(inflater, container, false);
-        return binding.getRoot();
-    }
+	@Nullable
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		binding = BudgetFragmentBinding.inflate(inflater, container, false);
+		return binding.getRoot();
+	}
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initListeners();
-    }
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		initListeners();
+	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        initComponents();
-    }
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		binding = null;
+	}
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
+	private void initComponents() {
+	}
 
-    private void initComponents() {
-    }
-
-    private void initListeners() {
-    }
+	private void initListeners() {
+	}
 }

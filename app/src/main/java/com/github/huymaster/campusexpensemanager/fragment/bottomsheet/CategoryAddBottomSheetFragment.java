@@ -44,6 +44,12 @@ public class CategoryAddBottomSheetFragment extends BottomSheetDialogFragment {
 		binding.categoryAddBottomSheetAddButton.setOnClickListener(v -> insertCategory());
 	}
 
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		binding = null;
+	}
+
 	private void insertCategory() {
 		Editable name = binding.categoryAddBottomSheetName.getText();
 		Editable description = binding.categoryAddBottomSheetDescription.getText();

@@ -40,6 +40,13 @@ public class CategoryEditBottomSheetFragment extends BottomSheetDialogFragment {
 		initListeners();
 	}
 
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		callback.accept(null);
+		binding = null;
+	}
+
 	private void initComponents() {
 		binding.categoryEditBottomSheetName.setText(category.getName().trim());
 		binding.categoryEditBottomSheetDescription.setText(category.getDescription() == null ? "" : category.getDescription().trim());

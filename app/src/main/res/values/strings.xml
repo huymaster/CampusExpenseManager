@@ -33,6 +33,12 @@
     <string name="category_bottom_sheet_save">Save</string>
 
     <!--ExpenseFragment-->
+    <string name="expenses_tab_overview">Overview</string>
+    <string name="expenses_tab_history">History</string>
+    <string name="expenses_tab_statistics">Statistics</string>
+
+    <string name="expense_overview_summary">Summary</string>
+    <string name="expense_overview_summary_title">Spent: %d / %d</string>
 
     <!--BudgetFragment-->
     <string name="budget_bottom_sheet_title">Edit Budget</string>
@@ -40,6 +46,7 @@
     <string name="budget_bottom_sheet_budget_name_hint">Budget name</string>
     <string name="budget_bottom_sheet_budget_amount_hint">Budget amount</string>
     <string name="budget_bottom_sheet_budget_start_date_hint">Start date </string>
+    <string name="budget_bottom_sheet_budget_end_date_hint">End date</string>
 
     <!--SettingsFragment-->
     <string name="settings_language">Language</string>
@@ -47,6 +54,7 @@
     <string name="settings_notification">Notification</string>
     <string name="settings_finger_print">Fingerprint lock</string>
     <string name="settings_language_en">English</string>
+    <string name="settings_hint">If the option is greyed out, it is not available on your device</string>
 
     <!--Dialog-->
     <string name="dialog_exit">Do you want to exit?</string>

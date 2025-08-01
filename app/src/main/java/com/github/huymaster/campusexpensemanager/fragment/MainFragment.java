@@ -24,6 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainFragment extends BaseFragment {
+	public static final String FRAGMENT_TAG = "MainFragment_TAG";
 	@Inject
 	UserViewModel viewModel;
 	private MainFragmentBinding binding;
@@ -47,10 +48,6 @@ public class MainFragment extends BaseFragment {
 	private void initListeners() {
 		binding.mainToolbar.setNavigationOnClickListener(v -> binding.mainDrawerLayout.open());
 		binding.mainNavigationView.setNavigationItemSelectedListener(this::menuItemListener);
-		viewModel.getLoggedInState().observe(getViewLifecycleOwner(), username -> {
-			if (username == null)
-				getNavController().navigate(R.id.action_mainFragment_to_loginFragment);
-		});
 	}
 
 	private void initComponents() {

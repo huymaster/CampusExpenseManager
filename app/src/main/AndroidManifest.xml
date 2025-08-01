@@ -9,7 +9,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <application
         android:name=".MainApplication"
@@ -22,25 +24,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
         android:theme="@style/Theme.CampusExpenseManager"
+        tools:ignore="DiscouragedApi,LockedOrientationActivity"
         tools:targetApi="36">
 
         <activity
-            android:name=".EntryActivity"
+            android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@style/Theme.App.Starting">
+            
+            android:theme="@style/Theme.App.Starting"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:screenOrientation="user"
-            android:windowSoftInputMode="adjustResize"
-            tools:ignore="DiscouragedApi" />
 
         <provider
             android:name="com.github.huymaster.campusexpensemanager.provider.RealmFileProvider"
