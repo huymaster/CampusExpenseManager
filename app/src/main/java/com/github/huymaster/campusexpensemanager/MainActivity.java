@@ -7,6 +7,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.github.huymaster.campusexpensemanager.core.ApplicationPreferences;
@@ -59,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
 		viewModel.getLoggedInState().observe(this, username -> {
 			preferences.set(ApplicationPreferences.loggedInUsername, username);
 			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-			transaction.replace(R.id.main_fragment_container, username == null ? new LoginFragment() : new MainFragment());
+			Fragment fragment = username == null ? new LoginFragment() : new MainFragment();
+			fragment.setArguments(getIntent().getExtras());
+			transaction.replace(R.id.main_fragment_container, fragment);
 			transaction.commit();
 		});
 	}

@@ -1,6 +1,5 @@
 package com.github.huymaster.campusexpensemanager.database.realm.type;
 
-import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -10,69 +9,72 @@ import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
 public class Budget extends RealmObject {
-    @Required
-    @PrimaryKey
-    private UUID id = UUID.randomUUID();
+	@Required
+	@PrimaryKey
+	private UUID id = UUID.randomUUID();
 
-    @Required
-    private String name;
+	@Required
+	private String name;
 
-    @Required
-    private Double amount;
+	@Required
+	private Double amount;
 
-    @Required
-    private Date startDate;
+	@Required
+	private Date startDate;
 
-    @Required
-    private Date endDate;
+	@Required
+	private Date endDate;
 
-    public Budget() {
-        startDate = Calendar.getInstance().getTime();
-        setEndDate(startDate);
-    }
+	public Budget() {
+		startDate = Calendar.getInstance().getTime();
+		setEndDate(startDate);
+	}
 
-    public UUID getId() {
-        return id;
-    }
+	public Budget(String name, double amount, Date startDate) {
+		this.name = name;
+		this.amount = amount;
+		this.startDate = startDate;
+		setEndDate(startDate);
+	}
 
-    public String getName() {
-        return name;
-    }
+	public UUID getId() {
+		return id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public double getAmount() {
-        return amount;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
+	public double getAmount() {
+		return amount;
+	}
 
-    public Date getStartDate() {
-        return startDate;
-    }
+	public void setAmount(double amount) {
+		this.amount = amount;
+	}
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-        setEndDate(startDate);
-    }
+	public Date getStartDate() {
+		return startDate;
+	}
 
-    public Date getEndDate() {
-        return endDate;
-    }
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+		setEndDate(startDate);
+	}
 
-    private void setEndDate(Date startDate) {
-        int day = startDate.toInstant().get(ChronoField.DAY_OF_MONTH);
-        int month = startDate.toInstant().get(ChronoField.MONTH_OF_YEAR);
-        int year = startDate.toInstant().get(ChronoField.YEAR);
+	public Date getEndDate() {
+		return endDate;
+	}
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        calendar.add(Calendar.MONTH, 1);
+	private void setEndDate(Date startDate) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startDate);
+		calendar.add(Calendar.MONTH, 1);
 
-        endDate = calendar.getTime();
-    }
+		endDate = calendar.getTime();
+	}
 }

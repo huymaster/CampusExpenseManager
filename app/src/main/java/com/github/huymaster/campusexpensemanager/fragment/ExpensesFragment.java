@@ -4,20 +4,40 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.github.huymaster.campusexpensemanager.R;
+import com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore;
+import com.github.huymaster.campusexpensemanager.database.realm.dao.UserDAO;
 import com.github.huymaster.campusexpensemanager.databinding.ExpensesFragmentBinding;
-import com.github.huymaster.campusexpensemanager.databinding.ExpensesSubviewContainerBinding;
+import com.github.huymaster.campusexpensemanager.fragment.bottomsheet.ExpenseAddBottomSheetFragment;
+import com.github.huymaster.campusexpensemanager.fragment.page.ExpenseHistoryPage;
+import com.github.huymaster.campusexpensemanager.fragment.page.ExpenseOverviewPage;
+import com.github.huymaster.campusexpensemanager.fragment.page.ExpenseStatisticsPage;
+import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
 import com.google.android.material.tabs.TabLayout;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ExpensesFragment extends BaseFragment {
+	public static final String EXPENSES_ADD_BOTTOM_SHEET_FRAGMENT_TAG = "expenses_add_bottom_sheet_fragment_tag";
+
+	@Inject
+	UserViewModel viewModel;
+	@Inject
+	DatabaseCore core;
+	private ExpensesPagerAdapter adapter;
 	private ExpensesFragmentBinding binding;
+	private UserDAO dao;
 
 	@Nullable
 	@Override
@@ -29,12 +49,14 @@ public class ExpensesFragment extends BaseFragment {
 	@Override
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+		dao = core.getDAO(UserDAO.class);
+		adapter = new ExpensesPagerAdapter(getChildFragmentManager(), getLifecycle());
 		initComponents();
 		initListeners();
 	}
 
 	private void initComponents() {
-		binding.expensesViewPager.setAdapter(new ExpensesPagerAdapter());
+		binding.expensesViewPager.setAdapter(adapter);
 	}
 
 	private void initListeners() {
@@ -68,43 +90,44 @@ public class ExpensesFragment extends BaseFragment {
 				binding.expensesTabLayout.selectTab(binding.expensesTabLayout.getTabAt(position));
 			}
 		});
+		binding.expensesAdd.setOnClickListener(v -> showAddExpenseDialog(false));
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (getArguments() != null && getArguments().getBoolean(EXPENSES_ADD_BOTTOM_SHEET_FRAGMENT_TAG))
+			showAddExpenseDialog(true);
+	}
+
+	private void showAddExpenseDialog(boolean finishOnSubmit) {
+		ExpenseAddBottomSheetFragment fragment = new ExpenseAddBottomSheetFragment(expense -> {
+			dao.addExpense(viewModel.getLoggedInUsername(), expense);
+			if (finishOnSubmit) getMainActivity().finishAndRemoveTask();
+		}, dao.getCategories(viewModel.getLoggedInUsername()));
+		fragment.show(getParentFragmentManager(), "ExpenseAddBottomSheetFragment");
 	}
 }
 
-class ExpensesPagerAdapter extends RecyclerView.Adapter<ExpensesSubVH> {
+class ExpensesPagerAdapter extends FragmentStateAdapter {
+	private static final int PAGE_COUNT = 3;
 
-	private final int[] layouts = new int[]{
-			R.layout.expenses_overview,
-			R.layout.expenses_history,
-			R.layout.expenses_statistics
-	};
+	public ExpensesPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+		super(fragmentManager, lifecycle);
+	}
 
 	@NonNull
 	@Override
-	public ExpensesSubVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.expenses_subview_container, parent, false);
-		return new ExpensesSubVH(view);
-	}
-
-	@Override
-	public void onBindViewHolder(@NonNull ExpensesSubVH holder, int position) {
-		View view = LayoutInflater.from(holder.itemView.getContext()).inflate(layouts[position], holder.container, false);
-		holder.container.addView(view);
+	public Fragment createFragment(int position) {
+		return switch (position) {
+			case 1 -> new ExpenseHistoryPage();
+			case 2 -> new ExpenseStatisticsPage();
+			default -> new ExpenseOverviewPage();
+		};
 	}
 
 	@Override
 	public int getItemCount() {
-		return layouts.length;
-	}
-}
-
-class ExpensesSubVH extends RecyclerView.ViewHolder {
-
-	public FrameLayout container;
-
-	public ExpensesSubVH(@NonNull View itemView) {
-		super(itemView);
-		ExpensesSubviewContainerBinding binding = ExpensesSubviewContainerBinding.bind(itemView);
-		container = binding.expensesSubviewContainer;
+		return PAGE_COUNT;
 	}
 }

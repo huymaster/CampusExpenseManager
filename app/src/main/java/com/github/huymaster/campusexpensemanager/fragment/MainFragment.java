@@ -48,6 +48,12 @@ public class MainFragment extends BaseFragment {
 	private void initListeners() {
 		binding.mainToolbar.setNavigationOnClickListener(v -> binding.mainDrawerLayout.open());
 		binding.mainNavigationView.setNavigationItemSelectedListener(this::menuItemListener);
+		if (getArguments() != null && getArguments().containsKey(ExpensesFragment.EXPENSES_ADD_BOTTOM_SHEET_FRAGMENT_TAG)) {
+			binding.mainNavigationView.setCheckedItem(R.id.navigation_expenses);
+			ExpensesFragment fragment = new ExpensesFragment();
+			fragment.setArguments(getArguments());
+			setFragment(fragment);
+		}
 	}
 
 	private void initComponents() {

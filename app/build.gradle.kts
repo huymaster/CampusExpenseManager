@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.cardview)
     implementation(libs.gridlayout)
     implementation(libs.recyclerview)
+    implementation(libs.recyclerViewDecoration)
     implementation(libs.fragment)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)

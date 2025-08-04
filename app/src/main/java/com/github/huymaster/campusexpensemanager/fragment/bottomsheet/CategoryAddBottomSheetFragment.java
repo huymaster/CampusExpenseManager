@@ -41,13 +41,30 @@ public class CategoryAddBottomSheetFragment extends BottomSheetDialogFragment {
 	}
 
 	private void initListeners() {
-		binding.categoryAddBottomSheetAddButton.setOnClickListener(v -> insertCategory());
+		binding.categoryAddBottomSheetAddButton.setOnClickListener(v -> {
+			if (checkInputs()) insertCategory();
+		});
 	}
 
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
+		callback.accept(null);
 		binding = null;
+	}
+
+	private boolean checkInputs() {
+		boolean valid = true;
+		Editable name = binding.categoryAddBottomSheetName.getText();
+		if (name != null) {
+			if (name.length() == 0) {
+				binding.categoryAddBottomSheetNameLayout.setError("Name cannot be empty");
+				valid = false;
+			} else if (name.length() <= 16) binding.categoryAddBottomSheetNameLayout.setError(null);
+			else
+				binding.categoryAddBottomSheetNameLayout.setError("Name cannot be longer than 16 characters");
+		}
+		return valid;
 	}
 
 	private void insertCategory() {

@@ -56,6 +56,21 @@ public class CategoryEditBottomSheetFragment extends BottomSheetDialogFragment {
 		binding.categoryEditBottomSheetSaveButton.setOnClickListener(v -> saveCategory());
 	}
 
+	private boolean checkInputs() {
+		boolean valid = true;
+		Editable name = binding.categoryEditBottomSheetName.getText();
+		if (name != null) {
+			if (name.length() == 0) {
+				binding.categoryEditBottomSheetNameLayout.setError("Name cannot be empty");
+				valid = false;
+			} else if (name.length() <= 16)
+				binding.categoryEditBottomSheetNameLayout.setError(null);
+			else
+				binding.categoryEditBottomSheetNameLayout.setError("Name cannot be longer than 16 characters");
+		}
+		return valid;
+	}
+
 	private void saveCategory() {
 		Editable name = binding.categoryEditBottomSheetName.getText();
 		Editable description = binding.categoryEditBottomSheetDescription.getText();

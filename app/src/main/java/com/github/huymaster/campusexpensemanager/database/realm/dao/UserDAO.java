@@ -57,6 +57,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void addCategory(String username, Category category) {
+		if (category == null) return;
 		List<Category> categories = getCategories(username);
 		if (exists(username))
 			if (categories.stream().noneMatch(c -> c.getName().equalsIgnoreCase(category.getName())))
@@ -67,6 +68,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void updateCategory(String username, UUID categoryID, Consumer<Category> updator) {
+		if (categoryID == null || updator == null) return;
 		List<Category> categories = getCategories(username);
 		if (exists(username))
 			if (categories.stream().anyMatch(c -> c.getId().equals(categoryID)))
@@ -80,6 +82,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void removeCategory(String username, UUID categoryID) {
+		if (categoryID == null) return;
 		List<Category> categories = getCategories(username);
 		if (exists(username))
 			if (categories.stream().anyMatch(c -> c.getId().equals(categoryID)))
@@ -96,6 +99,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public List<Expense> getExpensesFiltered(String username, Predicate<Expense> filter) {
+		if (filter == null) return getExpenses(username);
 		List<Expense> expenses = getExpenses(username);
 		List<Expense> filtered = new LinkedList<>();
 		expenses.stream().filter(filter).forEach(filtered::add);
@@ -103,22 +107,26 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public List<Expense> getExpensesSorted(String username, Comparator<Expense> comparator) {
+		if (comparator == null) return getExpenses(username);
 		List<Expense> expenses = getExpenses(username);
 		expenses.sort(comparator);
 		return expenses;
 	}
 
 	public List<Expense> getExpensesFilteredSorted(String username, Predicate<Expense> filter, Comparator<Expense> comparator) {
+		if (filter == null || comparator == null) return getExpenses(username);
 		List<Expense> expenses = getExpensesFiltered(username, filter);
 		expenses.sort(comparator);
 		return expenses;
 	}
 
 	public Expense getExpense(String username, UUID expenseID) {
+		if (expenseID == null) return null;
 		return getExpenses(username).stream().filter(e -> e.getId().equals(expenseID)).findFirst().orElse(null);
 	}
 
 	public void addExpense(String username, Expense expense) {
+		if (expense == null) return;
 		update(
 				query -> query.equalTo("username", username),
 				user -> user.getExpenses().add(expense)
@@ -126,6 +134,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void updateExpense(String username, UUID expenseID, Consumer<Expense> updator) {
+		if (expenseID == null || updator == null) return;
 		List<Expense> expenses = getExpenses(username);
 		if (exists(username))
 			if (expenses.stream().anyMatch(e -> e.getId().equals(expenseID)))
@@ -139,6 +148,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void removeExpense(String username, UUID expenseID) {
+		if (expenseID == null) return;
 		List<Expense> expenses = getExpenses(username);
 		if (exists(username))
 			if (expenses.stream().anyMatch(e -> e.getId().equals(expenseID)))
@@ -155,13 +165,19 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void addBudget(String username, Budget budget) {
+		if (budget == null) return;
 		update(
 				query -> query.equalTo("username", username),
-				user -> user.getBudgets().add(budget)
+				user -> {
+					if (user.getBudgets().stream().noneMatch(b -> b.getName().equalsIgnoreCase(budget.getName())))
+						if (user.getBudgets().stream().noneMatch(b -> budget.getStartDate().after(b.getStartDate()) && budget.getStartDate().before(b.getEndDate())))
+							user.getBudgets().add(budget);
+				}
 		);
 	}
 
 	public void updateBudget(String username, UUID budgetID, Consumer<Budget> updator) {
+		if (budgetID == null || updator == null) return;
 		List<Budget> budgets = getBudgets(username);
 		if (exists(username))
 			if (budgets.stream().anyMatch(b -> b.getId().equals(budgetID)))
@@ -175,6 +191,7 @@ public class UserDAO extends BaseDAO<User> {
 	}
 
 	public void removeBudget(String username, UUID budgetID) {
+		if (budgetID == null) return;
 		List<Budget> budgets = getBudgets(username);
 		if (exists(username))
 			if (budgets.stream().anyMatch(b -> b.getId().equals(budgetID)))

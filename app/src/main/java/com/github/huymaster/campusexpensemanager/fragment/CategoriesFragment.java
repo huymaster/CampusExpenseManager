@@ -1,12 +1,7 @@
 package com.github.huymaster.campusexpensemanager.fragment;
 
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.core.ItemTouchHelperAdapter;
-import com.github.huymaster.campusexpensemanager.core.ResourceFunctions;
+import com.github.huymaster.campusexpensemanager.core.SimpleItemTouchHelper;
 import com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore;
 import com.github.huymaster.campusexpensemanager.database.realm.dao.UserDAO;
 import com.github.huymaster.campusexpensemanager.database.realm.type.Category;
@@ -92,7 +87,7 @@ public class CategoriesFragment extends BaseFragment {
 		binding.categoriesList.setAdapter(adapter);
 
 		if (itemTouchHelper != null) itemTouchHelper.attachToRecyclerView(null);
-		itemTouchHelper = new ItemTouchHelper(new CategoryTouchHelper(adapter));
+		itemTouchHelper = new ItemTouchHelper(new SimpleItemTouchHelper(adapter));
 		itemTouchHelper.attachToRecyclerView(binding.categoriesList);
 	}
 
@@ -190,93 +185,5 @@ class CategoryVH extends RecyclerView.ViewHolder {
 		categoryViewHolderCard = binding.categoryViewHolderCard;
 		categoryViewHolderName = binding.categoryViewHolderName;
 		categoryViewHolderDescription = binding.categoryViewHolderDescription;
-	}
-}
-
-class CategoryTouchHelper extends ItemTouchHelper.SimpleCallback {
-	private static final int dragDirs = 0;
-	private static final int swipeDirs = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-
-	private final ItemTouchHelperAdapter adapter;
-
-	public CategoryTouchHelper(ItemTouchHelperAdapter adapter) {
-		super(dragDirs, swipeDirs);
-		this.adapter = adapter;
-	}
-
-	@Override
-	public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-		return false;
-	}
-
-	@Override
-	public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-		if (direction == ItemTouchHelper.LEFT)
-			adapter.onSwipeLeft(viewHolder.getAbsoluteAdapterPosition());
-		else if (direction == ItemTouchHelper.RIGHT)
-			adapter.onSwipeRight(viewHolder.getAbsoluteAdapterPosition());
-	}
-
-	@Override
-	public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-		if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE)
-			if (dX < 0) {
-				TypedValue colorError = new TypedValue();
-				TypedValue colorOnError = new TypedValue();
-				Resources.Theme theme = recyclerView.getContext().getTheme();
-				theme.resolveAttribute(androidx.appcompat.R.attr.colorError, colorError, true);
-				theme.resolveAttribute(com.google.android.material.R.attr.colorOnError, colorOnError, true);
-
-				View view = viewHolder.itemView;
-				float left = view.getRight() + dX;
-				float right = view.getRight();
-				float top = view.getTop();
-				float bottom = view.getBottom();
-
-
-				Paint p = new Paint();
-				p.setStyle(Paint.Style.FILL);
-				p.setColor(colorError.data);
-				c.drawRect(left, top, right, bottom, p);
-				p.setColor(colorOnError.data);
-				p.setAntiAlias(true);
-
-				int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, recyclerView.getResources().getDisplayMetrics());
-				int paddingRight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, recyclerView.getResources().getDisplayMetrics());
-				int postionTop = (int) (top) + (view.getHeight() - iconSize) / 2;
-				int postionLeft = view.getWidth() - (iconSize + paddingRight);
-
-				Drawable icon = ResourceFunctions.getDrawable(R.drawable.ic_delete);
-				icon.setBounds(postionLeft, postionTop, postionLeft + iconSize, postionTop + iconSize);
-				icon.draw(c);
-			} else {
-				TypedValue colorPrimary = new TypedValue();
-				TypedValue colorOnPrimary = new TypedValue();
-				Resources.Theme theme = recyclerView.getContext().getTheme();
-				theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, colorPrimary, true);
-				theme.resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, colorOnPrimary, true);
-
-				View view = viewHolder.itemView;
-				float left = view.getLeft() + dX;
-				float right = view.getLeft();
-				float top = view.getTop();
-				float bottom = view.getBottom();
-
-				Paint p = new Paint();
-				p.setStyle(Paint.Style.FILL);
-				p.setColor(colorPrimary.data);
-				c.drawRect(left, top, right, bottom, p);
-				p.setColor(colorOnPrimary.data);
-				p.setAntiAlias(true);
-
-				int iconSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, recyclerView.getResources().getDisplayMetrics());
-				int paddingLeft = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, recyclerView.getResources().getDisplayMetrics());
-				int postionTop = (int) (top) + (view.getHeight() - iconSize) / 2;
-
-				Drawable icon = ResourceFunctions.getDrawable(R.drawable.ic_edit);
-				icon.setBounds(paddingLeft, postionTop, paddingLeft + iconSize, postionTop + iconSize);
-				icon.draw(c);
-			}
-		super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 	}
 }

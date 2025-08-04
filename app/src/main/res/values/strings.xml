@@ -38,15 +38,35 @@
     <string name="expenses_tab_statistics">Statistics</string>
 
     <string name="expense_overview_summary">Summary</string>
-    <string name="expense_overview_summary_title">Spent: %d / %d</string>
+    <string name="expense_overview_summary_no_budget">No budget</string>
+    <string name="expense_overview_summary_amount">Spent: %s / %s</string>
+
+    <string name="expense_add_bottom_sheet_title">New Expense</string>
+    <string name="expense_edit_bottom_sheet_title">Edit Expense</string>
+    <string name="expense_bottom_sheet_name_hint">Expense name</string>
+    <string name="expense_bottom_sheet_amount_hint">Expense amount</string>
+    <string name="expense_bottom_sheet_category_hint">Expense category</string>
+    <string name="expense_add_bottom_sheet_add">Add</string>
+    <string name="expense_edit_bottom_sheet_save">Save</string>
+    <string name="expense_bottom_sheet_category_not_specified">not specified</string>
 
     <!--BudgetFragment-->
-    <string name="budget_bottom_sheet_title">Edit Budget</string>
-    <string name="budget_bottom_sheet_save">Save</string>
-    <string name="budget_bottom_sheet_budget_name_hint">Budget name</string>
-    <string name="budget_bottom_sheet_budget_amount_hint">Budget amount</string>
-    <string name="budget_bottom_sheet_budget_start_date_hint">Start date </string>
-    <string name="budget_bottom_sheet_budget_end_date_hint">End date</string>
+    <string name="budget_add_bottom_sheet_title">Add Budget</string>
+    <string name="budget_add_bottom_sheet_add">Add</string>
+    <string name="budget_edit_bottom_sheet_title">Edit Budget</string>
+    <string name="budget_edit_bottom_sheet_edit">Edit</string>
+    <string name="budget_bottom_sheet_name_hint">Budget name</string>
+    <string name="budget_bottom_sheet_amount_hint">Budget amount</string>
+    <string name="budget_bottom_sheet_start_date_hint">Start date </string>
+    <string name="budget_bottom_sheet_end_date_hint">End date</string>
+
+    <string name="budget_card_spent">Spent: %,.2f %s</string>
+    <string name="budget_card_total">Total: %,.2f %s</string>
+    <string name="budget_card_from">From: %s</string>
+    <string name="budget_card_end">To: %s</string>
+    <string name="budget_past">Past</string>
+    <string name="budget_current">Current</string>
+    <string name="budget_future">Future</string>
 
     <!--SettingsFragment-->
     <string name="settings_language">Language</string>
@@ -60,6 +80,8 @@
     <string name="dialog_exit">Do you want to exit?</string>
     <string name="dialog_create_account">Do you want to create account \'%s\'?</string>
     <string name="dialog_delete_category">Do you want to delete category \'%s\'?</string>
+    <string name="dialog_delete_expense">Do you want to delete expense \'%s\'?</string>
+    <string name="dialog_delete_budget">Do you want to delete budget \'%s\'?</string>
     <string name="dialog_logout">Do you want to logout?</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>

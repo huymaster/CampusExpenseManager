@@ -31,7 +31,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
-            
+
             android:theme="@style/Theme.App.Starting"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -49,5 +49,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service
+            android:name=".service.NewExpenseTile"
+            android:exported="true"
+            android:icon="@drawable/ic_add"
+            android:label="@string/expense_add_bottom_sheet_title"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
