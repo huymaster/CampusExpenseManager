@@ -95,6 +95,8 @@ dependencies {
     implementation(libs.compose.runtime)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
+    implementation(libs.donut)
+    implementation(libs.mpchart)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)

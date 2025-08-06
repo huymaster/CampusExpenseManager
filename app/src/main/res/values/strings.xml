@@ -41,6 +41,8 @@
     <string name="expense_overview_summary_no_budget">No budget</string>
     <string name="expense_overview_summary_amount">Spent: %s / %s</string>
 
+    <string name="expense_overview_last_3_expenses">Last 3 expenses</string>
+
     <string name="expense_add_bottom_sheet_title">New Expense</string>
     <string name="expense_edit_bottom_sheet_title">Edit Expense</string>
     <string name="expense_bottom_sheet_name_hint">Expense name</string>
@@ -80,7 +82,7 @@
     <string name="dialog_exit">Do you want to exit?</string>
     <string name="dialog_create_account">Do you want to create account \'%s\'?</string>
     <string name="dialog_delete_category">Do you want to delete category \'%s\'?</string>
-    <string name="dialog_delete_expense">Do you want to delete expense \'%s\'?</string>
+    <string name="dialog_delete_expense">Do you want to delete expense?</string>
     <string name="dialog_delete_budget">Do you want to delete budget \'%s\'?</string>
     <string name="dialog_logout">Do you want to logout?</string>
     <string name="dialog_ok">OK</string>

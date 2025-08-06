@@ -58,18 +58,14 @@ public class MainFragment extends BaseFragment {
 
 	private void initComponents() {
 		binding.mainNavigationView.getMenu().setGroupCheckable(R.id.navigation_group, true, true);
-		binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
+		binding.mainNavigationView.setCheckedItem(R.id.navigation_expenses);
+		setFragment(new ExpensesFragment());
 		binding.mainFrameLayout.removeAllViews();
 	}
 
 	private boolean menuItemListener(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.navigation_home) {
-			binding.mainNavigationView.setCheckedItem(R.id.navigation_home);
-			binding.mainFrameLayout.removeAllViews();
-			closeDrawer();
-			return true;
-		} else if (id == R.id.navigation_expenses) {
+		if (id == R.id.navigation_expenses) {
 			binding.mainNavigationView.setCheckedItem(R.id.navigation_expenses);
 			setFragment(new ExpensesFragment());
 			closeDrawer();

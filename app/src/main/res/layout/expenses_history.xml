@@ -5,9 +5,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/expenses_history_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="H" />
+            android:layout_height="match_parent"
+            android:layout_margin="8dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

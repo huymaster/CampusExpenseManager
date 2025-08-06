@@ -14,18 +14,19 @@ import com.github.huymaster.campusexpensemanager.database.realm.type.Expense;
 import com.github.huymaster.campusexpensemanager.databinding.ExpenseEditBottomSheetBinding;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import java.util.Calendar;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class ExpenseEditBottomSheetFragment extends BottomSheetDialogFragment {
 
+	private final Expense expense;
 	private final Consumer<Expense> callback;
 	private final List<Category> categories;
 
 	private ExpenseEditBottomSheetBinding binding;
 
-	public ExpenseEditBottomSheetFragment(@NonNull Consumer<Expense> callback, @Nullable List<Category> categories) {
+	public ExpenseEditBottomSheetFragment(@NonNull Expense expense, @NonNull Consumer<Expense> callback, @Nullable List<Category> categories) {
+		this.expense = expense;
 		this.callback = callback;
 		this.categories = categories == null ? List.of() : categories;
 	}
@@ -54,12 +55,18 @@ public class ExpenseEditBottomSheetFragment extends BottomSheetDialogFragment {
 	private void initComponents() {
 		String[] strings = this.categories.stream().map(Category::getName).toArray(String[]::new);
 		binding.expenseEditBottomSheetCategory.setSimpleItems(strings);
+		binding.expenseEditBottomSheetName.setText(expense.getName());
+		binding.expenseEditBottomSheetAmount.setText(String.valueOf(expense.getAmount()));
+		binding.expenseEditBottomSheetCategory.setSelected(expense.getCategory() != null);
+		if (expense.getCategory() != null)
+			binding.expenseEditBottomSheetCategory.setSelection(categories.indexOf(expense.getCategory()));
 	}
 
 	private void initListeners() {
 		binding.expenseEditBottomSheetEdit.setOnClickListener(v -> {
-			if (checkInputs()) submit();
-			dismiss();
+			if (checkInputs()) {
+				submit();
+			}
 		});
 	}
 
@@ -92,12 +99,5 @@ public class ExpenseEditBottomSheetFragment extends BottomSheetDialogFragment {
 	}
 
 	private void submit() {
-		Expense expense = new Expense();
-		expense.setName(binding.expenseEditBottomSheetName.getText().toString());
-		expense.setAmount(Double.parseDouble(binding.expenseEditBottomSheetAmount.getText().toString()));
-		expense.setCategory(categories.stream().filter(c -> c.getName().equals(binding.expenseEditBottomSheetCategory.getText().toString())).findFirst().orElse(null));
-		expense.setTimestamp(Calendar.getInstance().getTimeInMillis());
-		callback.accept(expense);
-		dismiss();
 	}
 }

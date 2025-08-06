@@ -24,6 +24,8 @@ sqlite = "2.5.2"
 lifecycleRuntimeKtx = "2.9.2"
 activityCompose = "1.10.1"
 ktx = "1.16.0"
+donut = "2.2.4"
+mpchart = "v3.1.0"
 hilt = "2.57"
 mockito = "5.18.0"
 powermock = "2.0.9"
@@ -67,6 +69,8 @@ ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
+donut = { group = "app.futured.donut", name = "donut", version.ref = "donut" }
+mpchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpchart" }
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 dagger-android-support = { group = "com.google.dagger", name = "dagger-android-support", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }

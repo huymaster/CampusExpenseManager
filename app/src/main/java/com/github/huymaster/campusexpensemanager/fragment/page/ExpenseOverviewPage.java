@@ -1,13 +1,17 @@
 package com.github.huymaster.campusexpensemanager.fragment.page;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.huymaster.campusexpensemanager.R;
 import com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore;
@@ -16,12 +20,18 @@ import com.github.huymaster.campusexpensemanager.database.realm.type.Budget;
 import com.github.huymaster.campusexpensemanager.database.realm.type.Expense;
 import com.github.huymaster.campusexpensemanager.databinding.ExpensesOverviewBinding;
 import com.github.huymaster.campusexpensemanager.fragment.BaseFragment;
+import com.github.huymaster.campusexpensemanager.fragment.ExpenseVH;
 import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -43,6 +53,8 @@ public class ExpenseOverviewPage extends BaseFragment {
 	private RealmResults<Expense> r;
 
 	private ExpensesOverviewBinding binding;
+	private int[] defaultIndicatorColor;
+	private int defaultTrackColor;
 
 	@Nullable
 	@Override
@@ -71,6 +83,10 @@ public class ExpenseOverviewPage extends BaseFragment {
 	}
 
 	private void initComponents() {
+		defaultIndicatorColor = binding.expensesOverviewSummaryProgress.getIndicatorColor();
+		defaultTrackColor = binding.expensesOverviewSummaryProgress.getTrackColor();
+		binding.expensesOverviewList.setLayoutManager(new LinearLayoutManager(requireContext()));
+		binding.expensesOverviewList.setHasFixedSize(true);
 	}
 
 	private void initListeners() {
@@ -90,7 +106,22 @@ public class ExpenseOverviewPage extends BaseFragment {
 		binding.expensesOverviewSummaryName.setText(budget == null ? getString(R.string.expense_overview_summary_no_budget) : budget.getName());
 		binding.expensesOverviewSummaryAmount.setText(getString(R.string.expense_overview_summary_amount, spent, total));
 		double progress = getProgress(budget, getSpent());
+		if (progress >= 100.0) {
+			TypedValue colorError = new TypedValue();
+			TypedValue colorOnError = new TypedValue();
+
+			Resources.Theme theme = binding.getRoot().getContext().getTheme();
+			theme.resolveAttribute(androidx.appcompat.R.attr.colorError, colorError, true);
+			theme.resolveAttribute(com.google.android.material.R.attr.colorOnError, colorOnError, true);
+
+			binding.expensesOverviewSummaryProgress.setIndicatorColor(colorError.data);
+			binding.expensesOverviewSummaryProgress.setTrackColor(colorOnError.data);
+		} else {
+			binding.expensesOverviewSummaryProgress.setIndicatorColor(defaultIndicatorColor);
+			binding.expensesOverviewSummaryProgress.setTrackColor(defaultTrackColor);
+		}
 		binding.expensesOverviewSummaryProgress.setProgress((int) progress, true);
+		binding.expensesOverviewList.setAdapter(new ExpensesOverviewAdapter(dao.getExpenses(viewModel.getLoggedInUsername())));
 	}
 
 	@Nullable
@@ -122,5 +153,41 @@ public class ExpenseOverviewPage extends BaseFragment {
 		} catch (ArithmeticException e) {
 			return 0.0;
 		}
+	}
+}
+
+class ExpensesOverviewAdapter extends RecyclerView.Adapter<ExpenseVH> {
+	private final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault());
+
+	private final List<Expense> expenses;
+
+	public ExpensesOverviewAdapter(List<Expense> expenses) {
+		this.expenses = expenses == null ? new LinkedList<>() : expenses;
+		assert expenses != null;
+		expenses.sort((e1, e2) -> (int) (e2.getTimestamp() - e1.getTimestamp()));
+		if (expenses.size() > 3)
+			expenses.subList(3, expenses.size()).clear();
+	}
+
+	@NonNull
+	@Override
+	public ExpenseVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.expense_view_holder, parent, false);
+		return new ExpenseVH(view);
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull ExpenseVH holder, int position) {
+		if (position < 0 || position >= expenses.size()) return;
+		Expense expense = expenses.get(position);
+		holder.expenseViewHolderName.setText(expense.getName() == null ? "<no name>" : expense.getName());
+		holder.expenseViewHolderAmount.setText(String.format(Locale.getDefault(), "%,.2f", expense.getAmount()));
+		holder.expenseViewHolderDate.setText(dateFormat.format(new Date(expense.getTimestamp())));
+		holder.expenseViewHolderCategory.setText(expense.getCategory() == null ? "<no category>" : expense.getCategory().getName());
+	}
+
+	@Override
+	public int getItemCount() {
+		return expenses.size();
 	}
 }

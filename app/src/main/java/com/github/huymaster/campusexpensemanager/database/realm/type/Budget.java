@@ -1,5 +1,7 @@
 package com.github.huymaster.campusexpensemanager.database.realm.type;
 
+import androidx.annotation.Nullable;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -76,5 +78,12 @@ public class Budget extends RealmObject {
 		calendar.add(Calendar.MONTH, 1);
 
 		endDate = calendar.getTime();
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj) {
+		if (obj instanceof Budget)
+			return ((Budget) obj).getId().equals(getId());
+		return false;
 	}
 }
