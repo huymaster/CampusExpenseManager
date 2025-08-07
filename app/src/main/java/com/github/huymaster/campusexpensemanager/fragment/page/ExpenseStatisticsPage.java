@@ -18,6 +18,7 @@ import com.github.huymaster.campusexpensemanager.databinding.ExpensesStatisticsB
 import com.github.huymaster.campusexpensemanager.fragment.BaseFragment;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -66,7 +67,7 @@ public class ExpenseStatisticsPage extends BaseFragment {
 	}
 
 	private void initComponents() {
-
+		updateUI(r);
 	}
 
 	private void initListeners() {
@@ -81,16 +82,20 @@ public class ExpenseStatisticsPage extends BaseFragment {
 
 	private void _updateUI(List<Expense> es) {
 		Map<Category, List<Expense>> categoried = es.stream()
+				.filter(e -> e.getCategory() != null)
 				.collect(Collectors.groupingBy(Expense::getCategory));
+
+		List<Expense> nullCategory = es.stream().filter(e -> e.getCategory() == null).collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
+		categoried.put(null, nullCategory);
 
 		Map<Category, List<Expense>> sorted = categoried.entrySet()
 				.stream()
 				.sorted((entry1, entry2) -> entry2.getValue().size() - entry1.getValue().size())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
 
-		sorted.entrySet().forEach(entry -> {
-			Log.d("ExpenseStatisticsPage", "Category: " + entry.getKey());
-			Log.d("ExpenseStatisticsPage", "Count: " + entry.getValue().size());
+		sorted.forEach((key, value) -> {
+			Log.d("ExpenseStatisticsPage", "Category: " + key);
+			Log.d("ExpenseStatisticsPage", "Count: " + value.size());
 		});
 	}
 }
