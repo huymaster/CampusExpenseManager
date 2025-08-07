@@ -3,7 +3,6 @@ package com.github.huymaster.campusexpensemanager.fragment.page;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -154,7 +153,6 @@ public class ExpenseHistoryPage extends BaseFragment {
 	private void updateUI(List<Expense> e) {
 		executor.execute(() -> {
 			e.sort((e1, e2) -> Long.compare(e2.getTimestamp(), e1.getTimestamp()));
-			Log.d("ExpenseHistoryPage", "updateUI: " + e.stream().map(Expense::getTimestamp).collect(LinkedList::new, LinkedList::add, LinkedList::addAll));
 			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 			List<Object> objects = new LinkedList<>();
 			Calendar cal = Calendar.getInstance();

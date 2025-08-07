@@ -32,7 +32,7 @@ powermock = "2.0.9"
 robolectric = "4.15.1"
 androidx-test-rules = "1.7.0"
 androidx-test-runner = "1.7.0"
-ksp = "2.2.0+"
+ksp = "2.2.0-2.0.2"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }

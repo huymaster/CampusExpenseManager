@@ -1,5 +1,6 @@
 package com.github.huymaster.campusexpensemanager.fragment.page;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,13 +15,16 @@ import androidx.annotation.Nullable;
 import com.github.huymaster.campusexpensemanager.database.realm.DatabaseCore;
 import com.github.huymaster.campusexpensemanager.database.realm.type.Category;
 import com.github.huymaster.campusexpensemanager.database.realm.type.Expense;
+import com.github.huymaster.campusexpensemanager.database.realm.type.User;
 import com.github.huymaster.campusexpensemanager.databinding.ExpensesStatisticsBinding;
 import com.github.huymaster.campusexpensemanager.fragment.BaseFragment;
+import com.github.huymaster.campusexpensemanager.viewmodel.UserViewModel;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -29,7 +33,8 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import io.realm.Realm;
-import io.realm.RealmResults;
+import io.realm.RealmList;
+import io.realm.RealmQuery;
 
 @AndroidEntryPoint
 public class ExpenseStatisticsPage extends BaseFragment {
@@ -38,7 +43,7 @@ public class ExpenseStatisticsPage extends BaseFragment {
 	@Inject
 	DatabaseCore core;
 	private Realm realm;
-	private RealmResults<Expense> r;
+	private RealmList<Expense> r;
 	private ExpensesStatisticsBinding binding;
 
 	@Nullable
@@ -52,7 +57,10 @@ public class ExpenseStatisticsPage extends BaseFragment {
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		realm = core.getRealm();
-		r = realm.where(Expense.class).findAll();
+		RealmQuery<User> query = realm.where(User.class).equalTo("username", UserViewModel.INSTANCE.getLoggedInUsername());
+		User user = query.findFirst();
+		if (user == null) return;
+		r = user.getExpenses();
 		r.addChangeListener(this::updateUI);
 		initComponents();
 		initListeners();
@@ -74,7 +82,7 @@ public class ExpenseStatisticsPage extends BaseFragment {
 
 	}
 
-	private void updateUI(RealmResults<Expense> e) {
+	private void updateUI(RealmList<Expense> e) {
 		if (e == null) return;
 		List<Expense> list = realm.copyFromRealm(e);
 		executor.execute(() -> _updateUI(list));
@@ -90,12 +98,34 @@ public class ExpenseStatisticsPage extends BaseFragment {
 
 		Map<Category, List<Expense>> sorted = categoried.entrySet()
 				.stream()
-				.sorted((entry1, entry2) -> entry2.getValue().size() - entry1.getValue().size())
+				.sorted((entry1, entry2) -> {
+					var e1 = entry1.getValue().stream().mapToDouble(Expense::getAmount).sum();
+					var e2 = entry2.getValue().stream().mapToDouble(Expense::getAmount).sum();
+					return Double.compare(e2, e1);
+				})
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
 
 		sorted.forEach((key, value) -> {
-			Log.d("ExpenseStatisticsPage", "Category: " + key);
-			Log.d("ExpenseStatisticsPage", "Count: " + value.size());
+			Log.d("ExpenseStatisticsPage", "Category: " + (key == null ? "null" : key.getName()) + " Count: " + value.size() + " Total: " + value.stream().mapToDouble(Expense::getAmount).sum());
 		});
+		updateChart(sorted);
+	}
+
+	private void updateChart(Map<Category, List<Expense>> categoried) {
+		double totalAmount = categoried.values().stream().mapToDouble(expenses -> expenses.stream().mapToDouble(Expense::getAmount).sum()).sum();
+		var total = 1f;
+		handler.post(() -> binding.donutProgress.setCap(total));
+		for (Category category : categoried.keySet()) {
+			var categoryGroup = categoried.get(category);
+			if (categoryGroup == null) continue;
+			var amount = categoryGroup.stream().mapToDouble(Expense::getAmount).sum();
+			var percent = (float) (amount / totalAmount);
+			handler.post(() -> binding.donutProgress.addAmount(category == null ? "<Other>" : category.getName(), percent, getRandomColor().toArgb()));
+		}
+	}
+
+	private Color getRandomColor() {
+		Random random = new Random();
+		return Color.valueOf(random.nextFloat(), random.nextFloat(), random.nextFloat());
 	}
 }
